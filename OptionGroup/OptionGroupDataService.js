@@ -6,6 +6,8 @@
 
 		service.Selectedoptionproduct = {};
 		service.currentproductoptiongroups = {};
+		service.rerenderHierarchy = false;
+		service.slectedOptionGroupProdId;
 
 		// option group methods.
 		service.getallOptionGroups = getallOptionGroups;
@@ -13,7 +15,10 @@
 		service.getSelectedoptionproduct = getSelectedoptionproduct;
 		service.setSelectedoptionproduct = setSelectedoptionproduct;
 		service.getcurrentproductoptiongroups = getcurrentproductoptiongroups;
-		
+		service.getrerenderHierarchy = getrerenderHierarchy;
+		service.setrerenderHierarchy = setrerenderHierarchy;
+		service.getslectedOptionGroupProdId = getslectedOptionGroupProdId;
+		service.setslectedOptionGroupProdId = setslectedOptionGroupProdId;
 		
 		function getallOptionGroups(){
 			return OptionGroupCache.getOptionGroups();
@@ -44,7 +49,8 @@
 			var cachedOptionGroups = OptionGroupCache.getOptionGroups();
 			if (OptionGroupCache.isValid
 				&& _.has(cachedOptionGroups, productId)){
-				return $q.when(cachedOptionGroups[productId]);
+				setcurrentproductoptiongroups(cachedOptionGroups[productId]);
+				return $q.when(true);
 			}
 
 			var bundleproductIds = [];
@@ -88,6 +94,22 @@
                 }), d));
             });
             return res;
+        }
+
+        function getrerenderHierarchy(){
+        	return service.rerenderHierarchy;
+        }
+
+        function setrerenderHierarchy(val){
+        	service.rerenderHierarchy = val;
+        }
+
+        function getslectedOptionGroupProdId(){
+        	return service.slectedOptionGroupProdId;
+        }
+
+        function setslectedOptionGroupProdId(val){
+        	service.slectedOptionGroupProdId = val;
         }
 	}
 })();
