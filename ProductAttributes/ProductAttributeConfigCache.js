@@ -41,11 +41,9 @@
 
 		function characterRepace(item){
             var changedItem = item;
-            if(item.indexOf("&#39;") >= 0){
-                changedItem = item.replace("&#39;","'");
-            }if(item.indexOf("&amp;") >= 0){
-                changedItem = item.replace("&amp;","&");
-            }           
+            changedItem = changedItem.split("&#39;").join("'");
+            //unescape: replaces &amp;, &lt;, &gt;, &quot;, &#96; and &#x27; with their unescaped counterparts.
+            changedItem = _.unescape(changedItem);           
             return changedItem;
         }
 	}
