@@ -102,19 +102,13 @@
         }
 
         $scope.saveinformation = function(){
-            var deferred;
-            deferred = $q.defer();
+            var deferred = $q.defer();
             $scope.baseService.startprogress();// start progress bar.
             if($scope.validateonsubmit())
             {
                 // selected service location Id.
-                var servicelocationId = null;
-                var servicelocation = $scope.locationService.getselectedlpa();
-                if(servicelocation)
-                {
-                    servicelocationId = servicelocation.Id;    
-                }
-
+                var servicelocationId = $scope.locationService.getselectedlpaId();
+                
                 // get the firstPMRecordId from PricingMatrixDataService and set PriceMatrixEntry__c on bundle.
                 var pricingmatrixId = $scope.pricingMatrixService.firstPMRecordId;
                 
@@ -131,11 +125,10 @@
                 _.each(allOptionGroups, function(optiongroups, bundleprodId){
                     _.each(optiongroups, function(optiongroup){
                         _.each(optiongroup.productOptionComponents, function(productcomponent){
-                            if((productcomponent.isselected && optiongroup.ischeckbox)
-                                || (productcomponent.productId == optiongroup.selectedproduct && !optiongroup.ischeckbox))
+                            if($scope.isProdSelected(productcomponent,optiongroup))
                             {
                                 productcomponent.isselected = true;
-                                productcomponent = _.omit(productcomponent, '$$hashKey');
+                                productcomponent = _.omit(productcomponent, ['$$hashKey', 'isDisabled']);
                                 
                                 var productId = productcomponent.productId;
                                 var otherSelected = false;
@@ -144,7 +137,6 @@
                                     var optionPAV = allproductIdtoPAVMap[productId];
                                     // Other picklist is selected then set OtherSelected to true.
                                     if(!_.isUndefined(_.findKey(optionPAV, function(value, pavField){return pavField.endsWith('Other');}))){
-                                    //if(!_.isEmpty(_.filter(_.keys(bundlePAV), function(pavField){return pavField.endsWith('Other');}))){    
                                         otherSelected = true;
                                         // clone Other Picklist values to regular Dropdowns and delete Other Field from PAV.
                                         optionPAV = $scope.formatPAVBeforeSave(optionPAV);
@@ -166,7 +158,6 @@
                     var bundlePAV = allproductIdtoPAVMap[bundleProdId];
                     // Other picklist is selected then set OtherSelected to true.
                     if(!_.isUndefined(_.findKey(bundlePAV, function(value, pavField){return pavField.endsWith('Other');}))){
-                    //if(!_.isEmpty(_.filter(_.keys(bundlePAV), function(pavField){return pavField.endsWith('Other');}))){
                         otherSelected_bundle = true;
                         // clone Other Picklist values to regular Dropdowns and delete Other Field from PAV.
                         bundlePAV = $scope.formatPAVBeforeSave(bundlePAV);
@@ -177,109 +168,21 @@
 
                 // remote call to save Quote Config.
                 var requestPromise = RemoteService.saveQuoteConfig(bundleLineItem, productcomponents, productIdtoPAVMap);
-                requestPromise.then(function(result){
-                    if(result.isSuccess)// if save call is successfull.
+                requestPromise.then(function(saveresult){
+                    if(saveresult.isSuccess)// if save call is successfull.
                     {
-                        /*appliedActionDOList is a List<Apttus_CPQApi.CPQ.AppliedActionDO>.
-                        IsPending                       :  Indicates Whether the rule action is pending user action.
-                        ########################Message Related##########################
-                        TriggeringProductIds (List<Id>) :  The list of triggering product ids that are in the cart.
-
-                        MessageType  (String)           :  Indicates whether the message is of warning type or error 
-                                                           type.(Error/Warning/Info)
-                        Message     (String)            :  This is the message to be displayed when the rule action is
-                                                           in pending state.
-                        IsShowPrompt                    :  This shows the message as a prompt. If the user cancels
-                                                           the prompt instead of taking action, marks the rule as
-                                                           ignored.
-                        ########################Auto inclusion/auto exclusion related########################
-                        IsAutoExecuted                  :  Indicates whether inclusion was performed by the system.
-                                                           if true, dont worry - Ignore - products will be auto-included.
-                                                           if false, process the rule and include SuggestedProductIds.
-                        ActionType  (String)            :  This is the type of rule action.(Inclusion/Exclusion/Validation/Recommendation/Replacement)
-                        ActionIntent                    :  Picklist on Constraint rule action. action intent depends on action type and SuggestedProductIds.
-                                                           This is the intent of the rule action whether to auto include or disable selection and so on.(Auto Include/Prompt/Show Message/Check on Finalization/Disable Selection)
-                        SuggestedProductIds (List<Id>)  :  The list of product ids suggested by the rule action to be
-                                                           included or excluded.
-                        AffectedProductIds (List<Id>)   :  list of products being included/excluded by auto-executed = true;
-                                                           The list of product ids added by auto inclusion or flagged
-                                                           by exclusion.
-                        */
-                        var constraintActionDoList = result.appliedActionDOList;
-                        var numErrors = constraintActionDoList.length;
-                        MessageService.clearAll();
-                        var productIdtoActionDOMap = {};
-                        
-                        _.each(constraintActionDoList, function(ActionDo){
-                            // get all error messages and add to MessageService.
-                            var TriggeringProductIds = ActionDo.TriggeringProductIds;
-                            var Message = ActionDo.Message;
-                            // possible message types : danger, warning, info, success.
-                            var MessageType = ActionDo.MessageType == 'Error' ? 'danger' : ActionDo.MessageType;
-                            var ActionType = ActionDo.ActionType;
-                            var ActionIntent = ActionDo.ActionIntent;
-                            var SuggestedProductIds = ActionDo.SuggestedProductIds;
-                            _.each(SuggestedProductIds, function(productId){
-                                productIdtoActionDOMap[productId] = {'ActionType': ActionType, 'ActionIntent': ActionIntent, 'Message':Message, 'MessageType':MessageType};
-                            })
-                        })
-
-                        // exclude or include products according to productIdtoActionDOMap.
-                        _.each(allOptionGroups, function(optiongroups, bundleprodId){
-                            _.each(optiongroups, function(optiongroup){
-                                _.each(optiongroup.productOptionComponents, function(productcomponent){
-                                    var productId = productcomponent.productId;
-                                    if(_.has(productIdtoActionDOMap, productId))
-                                    {
-                                        var ActionDO = productIdtoActionDOMap[productId];
-                                        var ActionType = ActionDO.ActionType;
-                                        var ActionIntent = ActionDO.ActionIntent;
-                                        var Message = ActionDO.Message;
-                                        var MessageType = ActionDO.MessageType
-                                        // possible values : Auto Include/Prompt/Show Message/Check on Finalization/Disable Selection
-                                        switch(ActionIntent)
-                                        {
-                                            case 'Auto Include':
-                                                if(ActionType == 'Inclusion')
-                                                {
-                                                    productcomponent.isselected = true;
-                                                }
-                                                break;
-                                            case 'Prompt':
-                                                break;
-                                            case 'Show Message':
-                                                if(ActionType == 'Inclusion'
-                                                    || ActionType == 'Exclusion'
-                                                    || ActionType == 'Validation'
-                                                    || ActionType == 'Recommendation'
-                                                    || ActionType == 'Replacement')
-                                                {
-                                                    MessageService.addMessage(MessageType, Message);
-                                                }
-                                                break;
-                                            case 'Check on Finalization':
-                                                break;
-                                            case 'Disable Selection':
-                                                if(ActionType == 'Exclusion')
-                                                {
-                                                    productcomponent.isselected = false;
-                                                    productcomponent['isDisabled'] = true;
-                                                }
-                                                break;
-                                        };
-                                    }
-                                })
-                            })
-                        })
-
-                        if(numErrors > 0)
-                        {
-                            $scope.safeApply();
+                        $scope.optionGroupService.runConstraintRules().then(function(constraintsResult){
+                            if(constraintsResult.numErrors > 0)
+                            {
+                                deferred.reject('Constraint rules Error.');    
+                            }
+                            else{
+                                // resolve the save promise after constraint remote call is complete with no constraint actions.
+                                deferred.resolve(true);
+                            }
                             $scope.baseService.completeprogress();// end progress bar.
-                            deferred.reject('Constraint rules Error.');
-                            return deferred.promise;
-                        }
-                    }
+                        })
+                    }// end of saveresult.isSuccess check.
                     else{
                         MessageService.addMessage('danger', 'Save call is Failing.');
                         $scope.baseService.completeprogress();// end progress bar.
@@ -287,11 +190,8 @@
                         deferred.reject('Save Failed.');
                         return deferred.promise;
                     }
-                    // resolver the promise after remote call is complete.
-                    $scope.baseService.completeprogress();// end progress bar.
-                    deferred.resolve(true);
-                })
-            }
+                })// end of saveQuoteConfig remote call.
+            }// end of validateonsubmit.
             else{
                 $scope.baseService.completeprogress();// end progress bar.
                 deferred.reject('Validations Failed.');
@@ -311,6 +211,13 @@
             }
         };
         
+        $scope.isProdSelected = function(productcomponent, optiongroup){
+            if((productcomponent.isselected && optiongroup.ischeckbox)
+                || (productcomponent.productId == optiongroup.selectedproduct && !optiongroup.ischeckbox))
+            return true;
+            return false;
+        }
+
         $scope.formatPAVBeforeSave = function(pav){
             // set the other picklist to original fields.
             _.each(_.filter(_.keys(pav), function(pavField){
