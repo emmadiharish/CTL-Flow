@@ -101,6 +101,18 @@
             })
         }
 
+        /*@Validate
+            Save Config and run constraint rules.
+        */
+        $scope.Validate = function(){
+            $scope.saveinformation().then(function(response){
+                if(response == true)
+                {
+                    
+                }
+            })
+        }
+
         $scope.saveinformation = function(){
             var deferred = $q.defer();
             $scope.baseService.startprogress();// start progress bar.
@@ -172,8 +184,10 @@
                     if(saveresult.isSuccess)// if save call is successfull.
                     {
                         $scope.optionGroupService.runConstraintRules().then(function(constraintsResult){
-                            if(constraintsResult.numErrors > 0)
+                            if(constraintsResult.numRulesApplied > 0)
                             {
+                                // render Hierarchy Once Constraint rules are run.
+                                $scope.optionGroupService.setrerenderHierarchy(true);
                                 deferred.reject('Constraint rules Error.');    
                             }
                             else{

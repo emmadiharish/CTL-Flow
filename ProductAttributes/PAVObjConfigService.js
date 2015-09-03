@@ -10,7 +10,7 @@
 		service.getPAVFieldMetaData = getPAVFieldMetaData;
 		service.loadPicklistDropDowns = loadPicklistDropDowns;
 		service.applyDependedPicklistsOnChange = applyDependedPicklistsOnChange;
-
+		
 		function getPAVFieldMetaData(){
 			if(service.isvalid == true)
 			{
@@ -233,6 +233,29 @@
 			return res;
 		}
 
+		// convert map<String, list<String>> of string to Map<Strin, List<Schema.PicklistEntry>>(JSON).
+		function prepareOptionsMap(objResult){
+			var res = {};
+			_.each(objResult, function(plovs, cLOV){
+				res[cLOV] = prepareOptionsList(plovs);
+			})
+			return res;
+		}
+
+		// convert list of string to List<Schema.PicklistEntry>.
+		function prepareOptionsList(lovs){
+			var res = [];
+			res = _.map(lovs, function(lov){
+					return selectoptionObject(true, lov, lov, false);
+				});
+			return res;
+		}
+
+		// object structure of Schema.PicklistEntry.
+		function selectoptionObject(active, label, value, isdefault){
+			return {active:active, label:label, value:value, defaultValue:isdefault};
+		}
+
 		function getStructuredDependentFields(dPicklistOptions, cPicklistOptions){
 			var res = {};
 			var objResult = {};
@@ -261,31 +284,7 @@
 			return res;
 		}
 
-		// convert map<String, list<String>> of string to Map<Strin, List<Schema.PicklistEntry>>(JSON).
-		function prepareOptionsMap(objResult){
-			var res = {};
-			_.each(objResult, function(plovs, cLOV){
-				res[cLOV] = prepareOptionsList(plovs);
-			})
-			return res;
-		}
-
-		// convert list of string to List<Schema.PicklistEntry>.
-		function prepareOptionsList(lovs){
-			var res = [];
-			res = _.map(lovs, function(lov){
-					return selectoptionObject(true, lov, lov, false);
-				});
-			return res;
-		}
-
-		// object structure of Schema.PicklistEntry.
-		function selectoptionObject(active, label, value, isdefault){
-			return {active:active, label:label, value:value, defaultValue:isdefault};
-		}
-
 		// testBit is implemented based on the algorithm :http://titancronus.com/blog/2014/05/01/salesforce-acquiring-dependent-picklists-in-apex/
-
 		function testBit(pValidFor, n){
 	        //the list of bytes
 	        var pBytes = [];
@@ -320,7 +319,10 @@
                 pFullValue = pFullValue + (pBytes[i] << (pShiftAmount));
 	        }
 	        
-	        var tBitVal = ((Math.pow(2, shiftBits)) & pFullValue) >> shiftBits;
+	        var powVal = Math.pow(2, shiftBits);
+	       	powVal = powVal > 2147483647 ? 2147483647 : powVal;
+	       	powVal = powVal < -2147483647 ? -2147483647 : powVal;
+	        var tBitVal = (powVal & pFullValue) >> shiftBits;
 	        return tBitVal == 1;
         }
 		
@@ -350,8 +352,8 @@
 					// if bit k is set, this entry is valid for the
 					// for the controlling entry at index k
 					var dLabel = picklistOption.label;
-					//var cLabel = cPicklistOptions[k].label;
-					//objResult[cLabel].push(dLabel);
+					var cLabel = cPicklistOptions[k].label;
+					objResult[cLabel].push(dLabel);
 					}
 				}
 			})
@@ -362,9 +364,9 @@
 		function Bitset(str){
 			var data = [];
 
-			for (var i = 0; i < str.length; i++) {
-			    data.push(str.charCodeAt(i));
-			}
+			_.each(str.split(""), function(eachchar){
+				data.push(Base64Value(eachchar));
+			})
 			return{
 				testBit : function(n){
 					return (data[n >> 3] & (0x80 >> n % 8)) != 0;

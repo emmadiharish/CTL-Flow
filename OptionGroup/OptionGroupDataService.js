@@ -43,11 +43,12 @@
 				OptionGroupCache.initializeOptionGroups(response);
 				// run constraint rules on each load of OptionGroups.
 				// runConstraintRules should be refacotored lated to apply constraint rules only once.
-				runConstraintRules().then(function(constraintsResult){
+				return runConstraintRules().then(function(constraintsResult){
                 	BaseService.setOptionGroupLoadComplete();    
+                    return OptionGroupCache.getOptionGroups();
                 })
 				// logTransaction(response, categoryRequest);
-				return OptionGroupCache.getOptionGroups();
+				// return OptionGroupCache.getOptionGroups();
 			});
 		}
 
@@ -151,7 +152,7 @@
                                                    by exclusion.
                 */
                 var constraintActionDoList = result.appliedActionDOList;
-                var numErrors = 0; //constraintActionDoList.length;
+                var numRulesApplied = 0; //constraintActionDoList.length;
                 MessageService.clearAll();
                 var allOptionGroups = getallOptionGroups();
                 var productIdtoActionDOMap = {};
@@ -188,7 +189,12 @@
                                     case 'Auto Include':
                                         if(ActionType == 'Inclusion')
                                         {
-                                            productcomponent.isselected = true;
+                                            // apply only if option is not selected.
+                                            if(!isProdSelected(productcomponent, optiongroup))
+                                            {    
+                                                productcomponent.isselected = true;
+                                                numRulesApplied++;
+                                            }
                                         }
                                         break;
                                     case 'Prompt':
@@ -201,7 +207,7 @@
                                             || ActionType == 'Replacement')
                                         {
                                             MessageService.addMessage(MessageType, Message);
-                                            numErrors++;
+                                            numRulesApplied++;
                                         }
                                         break;
                                     case 'Check on Finalization':
@@ -209,19 +215,21 @@
                                     case 'Disable Selection':
                                         if(ActionType == 'Exclusion')
                                         {
+                                            // apply rule only if option is selected.
                                             if(isProdSelected(productcomponent, optiongroup))
                                             {
-                                                MessageService.addMessage(MessageType, Message);
-                                                numErrors++;
-                                            }
-                                            // if disabled product is selected as radio then remove it.
-                                            if(optiongroup.ischeckbox == false)
-                                            {
-                                               optiongroup.selectedproduct = null;
-                                            }
-                                            else{
-                                                // if disabled product is selected as checkbox then remove it.
-                                                productcomponent.isselected = false;
+                                                // MessageService.addMessage(MessageType, Message);
+                                                numRulesApplied++;
+                                                
+                                                // if disabled product is selected as radio then remove it.
+                                                if(optiongroup.ischeckbox == false)
+                                                {
+                                                   optiongroup.selectedproduct = null;
+                                                }
+                                                else{
+                                                    // if disabled product is selected as checkbox then remove it.
+                                                    productcomponent.isselected = false;
+                                                }
                                             }
                                             productcomponent['isDisabled'] = true;
                                         }
@@ -231,8 +239,8 @@
                         })
                     })
                 })
-
-                res = {isSuccess:true, numErrors:numErrors};
+                
+                res = {isSuccess:true, numRulesApplied:numRulesApplied};
                 deferred.resolve(res);
             })// end of runConstraintRules remote call.
             return deferred.promise;
