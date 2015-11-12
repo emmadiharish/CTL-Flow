@@ -56,7 +56,7 @@
 			var productIdset = [], allgroupIds = [];
 			var currentproductoptiongroups = OptionGroupDataService.getcurrentproductoptiongroups();
             var dynamicgroupId = selectedlocationId != '' ? productId+selectedlocationId : '';
-			if (serice.isValid
+			if (service.isValid
 				&& cachedProductAttributes != null
 				&& cachedProductAttributes.prodductIdtoattributegroupsMap != null
 				&& _.has(cachedProductAttributes.prodductIdtoattributegroupsMap, productId))
