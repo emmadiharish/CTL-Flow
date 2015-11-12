@@ -65,7 +65,7 @@
                     if(!_.isNull(optionGroup))
                         selectOptionProduct(prodcomponent, optionGroup);
                     
-                    // OptionGroupDataService.setrerenderHierarchy(true);
+                    OptionGroupDataService.setrerenderHierarchy(true);
                     grpCtrl.currentproductoptiongroups = OptionGroupDataService.getcurrentproductoptiongroups();
                         
                     remotecallinitiated = false;
