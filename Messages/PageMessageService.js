@@ -20,9 +20,11 @@
             prompt: []
         };
 
-        service.addMessage = function(ruleType, msg){
+        function init(){
             messages[0] = angular.copy(messageTemplate);
-            
+        }
+
+        service.addMessage = function(ruleType, msg){
             var targetMessages = messages[0];
             targetMessages.page[ruleType].push({Message:msg});
         }
@@ -43,5 +45,7 @@
         service.getMessages = function() {
             return messages[0];
         };
+
+        init();
     }
 })();

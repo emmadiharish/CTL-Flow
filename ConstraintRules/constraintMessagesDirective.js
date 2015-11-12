@@ -24,8 +24,7 @@
     function ConstraintMessagesCtrl(ConstraintRuleDataService) {
         var ctrl = this;
         
-        // ctrl.labels = i18nService.CustomLabel;
-        ctrl.errorMessages = [];
+        // ctrl.errorMessages = [];
         ctrl.messageField = 'Message';
 
         ctrl.pageErrors = function() {
