@@ -1,12 +1,18 @@
-(function() {
-	angular.module('APTPS_ngCPQ').service('ProductAttributeConfigDataService', ProductAttributeConfigDataService); 
-	ProductAttributeConfigDataService.$inject = ['$q', '$log', 'BaseService', 'QuoteDataService', 'RemoteService', 'OptionGroupDataService', 'ProductAttributeConfigCache'];
-	function ProductAttributeConfigDataService($q, $log, BaseService, QuoteDataService, RemoteService, OptionGroupDataService, ProductAttributeConfigCache) {
+;(function() {
+	'use strict';
+    
+    angular.module('APTPS_ngCPQ').service('ProductAttributeConfigDataService', ProductAttributeConfigDataService); 
+	ProductAttributeConfigDataService.$inject = ['$q', '$log', 'BaseService', 'BaseConfigService', 'RemoteService', 'OptionGroupDataService', 'ProductAttributeConfigCache'];
+	function ProductAttributeConfigDataService($q, $log, BaseService, BaseConfigService, RemoteService, OptionGroupDataService, ProductAttributeConfigCache) {
 		var service = this;
 		
+		var bundleAttribueFields = [];
+
 		// product attribute methods.
 		service.getProductAttributesConfig = getProductAttributesConfig;
 		service.getDynamicGroups = getDynamicGroups;
+		service.getBundleAttributeFields = getBundleAttributeFields;
+		service.setBundleAttributeFields = setBundleAttributeFields;
 		
 		function getProductAttributesConfig_bulk(servicelocationIdSet, productIds, groupIds) {
 			// check if cachedProductAttributes has products requested for else make a remote call.
@@ -19,8 +25,13 @@
 				return $q.when(cachedProductAttributes);
 			}
 
-			// locationRequest = createOptionGroupRequestDO(productIds_filtered, QuoteDataService.getcartId(), QuoteDataService.getcontextLineNumber());
-			var requestPromise = RemoteService.getProductAttributeConfigData(servicelocationIdSet, QuoteDataService.getbundleproductId(), productIds_filtered, groupIds);
+			// locationRequest = createOptionGroupRequestDO(productIds_filtered, BaseConfigService.getcartId(), BaseConfigService.getcontextLineNumber());
+			var attributeGroupRequest = {servicelocationIds:servicelocationIdSet
+                                        , bundleprodId: BaseConfigService.lineItem.bundleProdId
+                                        , productIdsList: productIds_filtered
+                                        , allgroupIds: groupIds
+                                        };
+            var requestPromise = RemoteService.getAttributeGroups(attributeGroupRequest);
 			BaseService.startprogress();// start progress bar.
 			return requestPromise.then(function(response){
 				ProductAttributeConfigCache.initializeProductAttributes(response);
@@ -84,6 +95,46 @@
             return res;
         }
 
+        // Util methid. a: product Id to attribute groups map, b: productId, c: product to dynamic group map., d: dynamic group Id.
+        /*function buildattributegroups(prodIdtoattributegroups, prodId, prodIdtodynamicattributegroups, dynamicgroupId){
+            var res = [];
+            
+            // collect all dynamic attributes if exists.
+            var dynamicAttributes = {};
+            if(_.isObject(prodIdtodynamicattributegroups)
+            	&& _.has(prodIdtodynamicattributegroups, dynamicgroupId))
+            {
+                _.each(prodIdtodynamicattributegroups[dynamicgroupId].productAtributes, function(dynamicattribute){
+                	dynamicAttributes[dynamicattribute.fieldName] = dynamicattribute;
+                })
+            }
+
+            // get attributes configured at product level.
+            if(_.has(prodIdtoattributegroups, prodId))
+            {
+                _.each(prodIdtoattributegroups[prodId], function(g) {
+                    res.push(g);
+                })
+            }
+
+            // replace attributes(product level) values with dynamic attributes from location availability.
+            if(!_.isEmpty(dynamicAttributes))
+            {
+            	_.each(res, function(attrGroup){
+	            	_.each(attrGroup.productAtributes, function(prodAttribute){
+	            		if(_.has(dynamicAttributes, prodAttribute.fieldName))
+	            		{
+	            			prodAttribute.lovs = dynamicAttributes[prodAttribute.fieldName].lovs;
+	            			// unhide dynamic attribute if lov's exists.
+	            			prodAttribute.isHidden = _.size(prodAttribute.lovs) > 0 ? false : prodAttribute.isHidden;
+	            			prodAttribute.isDynamicAttr = true;
+	            		}
+	            	})
+	            })	
+            }
+            return res;
+        }*/
+
 		// util method. a: option groups, b: field name to access product components, c: field name to access product Id within product component.
         function getAllProductsinCurrentOptiongroups(a, b, c){
             // return a list of bundle product Id's. based on flag provided.
@@ -92,7 +143,19 @@
                 res.push(_.pluck(group[b], c));
             });
             res = _.flatten(res);// Flattens a nested array.
+            res = _.filter(res, function(prodId){return !_.isUndefined(prodId)});
             return res;
+        }
+
+        function setBundleAttributeFields(attrgroups){
+        	_.each(attrgroups, function(attrgroup){
+                bundleAttribueFields.push(_.pluck(attrgroup.productAtributes, 'fieldName'));
+            })
+            bundleAttribueFields = _.flatten(bundleAttribueFields);
+        }
+
+        function getBundleAttributeFields(){
+        	return bundleAttribueFields;
         }
     }
 })();

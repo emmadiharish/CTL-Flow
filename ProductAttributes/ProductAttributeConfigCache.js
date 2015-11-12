@@ -1,20 +1,22 @@
-(function() {
+;(function() {
+	'use strict';
+	
 	angular.module('APTPS_ngCPQ').service('ProductAttributeConfigCache', ProductAttributeConfigCache); 
 	ProductAttributeConfigCache.$inject = ['$log'];
 	function ProductAttributeConfigCache($log) {
 		var service = this;
-		//service.productIdtoproductgroupIdsMap = {};
-		//service.groupIdtoattributegroupMap = {};
-		service.prodductIdtoattributegroupsMap = {};
-		service.productIdtodynamicattributegroupMap = {};
 		service.isValid = false;
+
+		var prodductIdtoattributegroupsMap = {};
+		var productIdtodynamicattributegroupMap = {};
+		
 		
 		// Product Attribute Cache methods.
 		service.getProductAttributesConfig = getProductAttributesConfig;
 		service.initializeProductAttributes = initializeProductAttributes;
 		
 		function getProductAttributesConfig() {
-			var attributeResult = {'prodductIdtoattributegroupsMap' : service.prodductIdtoattributegroupsMap, 'productIdtodynamicattributegroupMap': service.productIdtodynamicattributegroupMap};
+			var attributeResult = {'prodductIdtoattributegroupsMap' : prodductIdtoattributegroupsMap, 'productIdtodynamicattributegroupMap': productIdtodynamicattributegroupMap};
 			return attributeResult;
 		}
 
@@ -29,12 +31,12 @@
                 	group.groupName = characterRepace(group.groupName);
                 })
                 
-                service.prodductIdtoattributegroupsMap[prodId] = attributeGroups;
+                prodductIdtoattributegroupsMap[prodId] = attributeGroups;
             });
             
             // dynamic attribute groups.
 			_.each(result.productIdtodynamicattributegroupMap, function (attributeGroup, prodpluslocationId) {
-            	service.productIdtodynamicattributegroupMap[prodpluslocationId] = attributeGroup;
+            	productIdtodynamicattributegroupMap[prodpluslocationId] = attributeGroup;
             });
 			service.isValid = true;
 		}

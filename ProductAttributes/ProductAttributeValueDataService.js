@@ -1,74 +1,75 @@
-(function() {
+;(function() {
+	'use strict';
+	
 	angular.module('APTPS_ngCPQ').service('ProductAttributeValueDataService', ProductAttributeValueDataService); 
-	ProductAttributeValueDataService.$inject = ['$q', '$log', 'BaseService', 'QuoteDataService','RemoteService', 'OptionGroupDataService', 'ProductAttributeValueCache'];
-	function ProductAttributeValueDataService($q, $log, BaseService, QuoteDataService, RemoteService, OptionGroupDataService, ProductAttributeValueCache) {
+	ProductAttributeValueDataService.$inject = ['$q', '$log', 'BaseService', 'BaseConfigService','RemoteService'];
+	function ProductAttributeValueDataService($q, $log, BaseService, BaseConfigService, RemoteService) {
 		var service = this;
-
-		service.bundleproductattributevalues = {};
-
-		service.getAllProductAttributeValues = ProductAttributeValueCache.getProductAttributeValues;
+		var bundleproductattributevalues = {};
+		var componentIdtoOptionPAVMap = {};
+		
+		service.isValid = false;
 		service.getProductAttributeValues = getProductAttributeValues;
-		service.getbundleproductattributevalues = getbundleproductattributevalues;
 		service.setbundleproductattributevalues = setbundleproductattributevalues;
+		service.getbundleproductattributevalues = getbundleproductattributevalues;
+		service.getoptionproductattributevalues = getoptionproductattributevalues;
 
-		function getProductAttributeValues_bulk(productIds){
-			// check if cachedProductAttributes has products requested for else make a remote call.
-			var cachedProductAttributeValues = ProductAttributeValueCache.getProductAttributeValues();
-			var productIds_filtered = _.filter(productIds, function(Id){ return !cachedProductAttributeValues.hasOwnProperty(Id); });
-			if (ProductAttributeValueCache.isValid
-				&& _.isEmpty(productIds_filtered)){
-				// logTransaction(cachedProductAttributes);
-				return $q.when(cachedProductAttributes);
-			}
-
-			var requestPromise = RemoteService.getProductAttributeValueData(productIds_filtered, QuoteDataService.getcartId(), QuoteDataService.getcontextLineNumber());
+		function getProductAttributeValues_bulk(){
+			var productAttributeValueDataRequest = {cartId: BaseConfigService.cartId
+													, lineNumber: BaseConfigService.lineItem.lineNumber};
+			var requestPromise = RemoteService.getProductAttributeValueData(productAttributeValueDataRequest);
 			BaseService.startprogress();// start progress bar.
 			return requestPromise.then(function(response){
-				ProductAttributeValueCache.initializeProductAttributeValues(response);
+				initializeProductAttributeValues(response);
 				// logTransaction(response, categoryRequest);
 				BaseService.setPAVLoadComplete();
-				return ProductAttributeValueCache.getProductAttributeValues();
+				return componentIdtoOptionPAVMap;
 			});
 		}
 
-		function getProductAttributeValues(productId){
-			var currentproductoptiongroups = OptionGroupDataService.getcurrentproductoptiongroups();
-			var cachedPAVSMap = ProductAttributeValueCache.getProductAttributeValues();
-			if (ProductAttributeValueCache.isValid
-				&& _.has(cachedPAVSMap, productId)) {
-				return $q.when(cachedPAVSMap[productId]);
+		function getProductAttributeValues(componentId){
+			if(service.isValid == true)
+			{
+				if(!_.has(componentIdtoOptionPAVMap, componentId))
+					componentIdtoOptionPAVMap[componentId] = {};
+				return $q.when(componentIdtoOptionPAVMap[componentId]);
 			}
 
-			// collect all current productId's in currentproductoptiongroups.
-			var productIds = getAllProductsinCurrentOptiongroups(currentproductoptiongroups, 'productOptionComponents', 'productId');
-			productIds.push(productId);
-			productIds = _.uniq(productIds);
-			return getProductAttributeValues_bulk(productIds).then(function(response){
-				var optionGroups = response;
-				return optionGroups[productId];
-			});
+			return getProductAttributeValues_bulk().then(function(result){
+				if(!_.has(componentIdtoOptionPAVMap, componentId))
+					componentIdtoOptionPAVMap[componentId] = {};
+				return componentIdtoOptionPAVMap[componentId];
+			})
 		}
 
-		// util method. a: option groups, b: field name to access product components, c: field name to access product Id within product component.
-        function getAllProductsinCurrentOptiongroups(a, b, c){
-            // return a list of bundle product Id's. based on flag provided.
-            var res = [];
-            _.each(a, function (group) {
-                res.push(_.pluck(group[b], c));
-            });
-            res = _.flatten(res);// Flattens a nested array.
-            return res;
-        }
-
-        function setbundleproductattributevalues(pav){
-        	if(_.isEmpty(service.bundleproductattributevalues))
+		function setbundleproductattributevalues(pav){
+        	if(_.isEmpty(bundleproductattributevalues))
         	{
-        		service.bundleproductattributevalues = pav;
+        		bundleproductattributevalues = pav;
         	}
         }
 
         function getbundleproductattributevalues(){
-        	return service.bundleproductattributevalues;
+        	return bundleproductattributevalues;
         }
+
+        function getoptionproductattributevalues(){
+			return componentIdtoOptionPAVMap;
+		}
+
+		function initializeProductAttributeValues(response){
+			service.isValid = true;
+			_.each(response.pavWrapList, function(pavwrapper){
+				// bundle pav if Apttus_Config2__OptionId__c is null.
+				if(!_.has(pavwrapper.lineItem, 'Apttus_Config2__OptionId__c')
+					|| _.isNull(pavwrapper.lineItem.Apttus_Config2__OptionId__c))
+				{
+					setbundleproductattributevalues(pavwrapper.pav);
+				}// option line
+				else{
+					componentIdtoOptionPAVMap[pavwrapper.lineItem.Apttus_Config2__ProductOptionId__c] = pavwrapper.pav;
+				}
+			})
+		}
 	}
 })();

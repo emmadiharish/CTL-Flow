@@ -1,15 +1,14 @@
-(function() {
+;(function() {
+	'use strict';
 	angular.module('APTPS_ngCPQ').service('MiniCartDataService', MiniCartDataService); 
-	MiniCartDataService.$inject = ['$q', '$log', 'QuoteDataService', 'RemoteService'];
-	function MiniCartDataService($q, $log, QuoteDataService, RemoteService){
+	MiniCartDataService.$inject = ['$q', '$log', 'BaseService', 'BaseConfigService', 'RemoteService'];
+	function MiniCartDataService($q, $log, BaseService, BaseConfigService, RemoteService){
 		var service = this;
-		service.quoteService = QuoteDataService;
+		var miniCartLines = [];
+		var miniCartLinesCount = 0;
 
 		service.isValid = false;
-		service.miniCartLines = [];
-		service.miniCartLinesCount = 0;
-				
-		// Pricing Methods.
+		
 		service.getMiniCartLines = getMiniCartLines;
 		service.getminiCartLinesCount = getminiCartLinesCount;
 		service.setMinicartasDirty = setMinicartasDirty;
@@ -19,29 +18,35 @@
 		
 		function getMiniCartLines() {
 			if (service.isValid) {
-				return $q.when(service.miniCartLines);
+				return $q.when(miniCartLines);
 			}
 			
-			var requestPromise = RemoteService.getMiniCartLines(QuoteDataService.getcartId());
+			var miniCartRequest = {cartId : BaseConfigService.cartId};
+			var requestPromise = RemoteService.getMiniCartLines(miniCartRequest);
+			BaseService.startprogress();// start progress bar.
 			return requestPromise.then(function(response){
 				service.isValid = true;
-				service.miniCartLines = response;
-				service.miniCartLinesCount = response.length;
-				return service.miniCartLines;
+				BaseService.setMiniCartLoadComplete();
+				miniCartLines = response.lineItems;
+				miniCartLinesCount = response.length;
+				return miniCartLines;
 			});
 		}
 
 		function configureLineItem(lineItemId){
-			var cartId = service.quoteService.getcartId(), configRequestId = service.quoteService.getconfigRequestId(), flowValue = service.quoteService.getflowValue();
-			var requestPromise = RemoteService.configureLineItem(cartId, configRequestId, flowValue, lineItemId);
+			var configureLineRequest = {cartHeader:BaseConfigService.cartHeader
+										, lineItemId: lineItemId};
+			var requestPromise = RemoteService.configureLineItem(configureLineRequest);
 			return requestPromise.then(function(response){
 				return response;
 			});
 		}
 
 		function deleteLineItemFromCart(lineNumber_tobedeleted){
-			var cartId = service.quoteService.getcartId(), configRequestId = service.quoteService.getconfigRequestId(), currentlineNumber = service.quoteService.getcontextLineNumber();
-            var requestPromise = RemoteService.deleteLineItemFromCart(cartId, configRequestId, lineNumber_tobedeleted, currentlineNumber);
+			var deleteLineRequest = {cartHeader:BaseConfigService.cartHeader
+									 , lineItemNumber_tobedeleted: lineNumber_tobedeleted
+									 , currentLineNumber: BaseConfigService.lineItem.lineNumber};
+            var requestPromise = RemoteService.deleteLineItemFromCart(deleteLineRequest);
 			return requestPromise.then(function(response){
 				return response;
 			});
@@ -52,7 +57,7 @@
 		}
 
 		function getminiCartLinesCount(){
-			return service.miniCartLinesCount;
+			return miniCartLinesCount;
 		}
 	}
 })();

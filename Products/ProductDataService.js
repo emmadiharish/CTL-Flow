@@ -1,32 +1,45 @@
-(function() {
+;(function() {
+	'use strict';
+	
 	angular.module('APTPS_ngCPQ').service('ProductDataService', ProductDataService); 
-	ProductDataService.$inject = ['$q', '$log', 'QuoteDataService', 'RemoteService'];
-	function ProductDataService($q, $log, QuoteDataService, RemoteService){
+	ProductDataService.$inject = ['$q', '$log', 'RemoteService'];
+	function ProductDataService($q, $log, RemoteService){
 		var service = this;
 
-		service.isValid = false;
-		service.productIdtoProductMap = {};
-
+		var productIdtoProductMap = {};
+		var isValid = false;
+		
 		service.getProducts = getProducts;
 
 		function getProducts(ProductIds){
-			var existingproductIds = _.keys(service.productIdtoProductMap);
+			var res = {};
+			
+			var existingproductIds = _.keys(productIdtoProductMap);
 			var ProductIds_filtered = _.filter(ProductIds, function(Id){return !_.contains(existingproductIds, Id);});
-			if(service.isValid)
+
+			if(isValid
+				&& _.size(ProductIds_filtered) < 1)
 			{
-				return $q.when(service.productIdtoProductMap);
+				_.each(ProductIds, function(prodId){
+					res[prodId] = productIdtoProductMap[prodId];
+				})
+				return $q.when(res);
 			}
 
-			var requestPromise = RemoteService.getProducts(ProductIds_filtered);
-			requestPromise.then(function(response){
+			var productsRequest ={productIds : ProductIds_filtered};
+			var requestPromise = RemoteService.getProducts(productsRequest);
+			return requestPromise.then(function(response){
 				initializeproductIdtoProductMap(response);
-				return service.productIdtoProductMap;
-			})
+				_.each(ProductIds, function(prodId){
+					res[prodId] = productIdtoProductMap[prodId];
+				})
+				return res;
+			});
 		}
 
 		function initializeproductIdtoProductMap(products){
-			service.isValid = true;
-			service.productIdtoProductMap = _.object(_.map(products, function(p){return [p.Id, p];}));
+			isValid = true;
+			productIdtoProductMap = _.object(_.map(products, function(p){return [p.Id, p];}));
 		}
 	}
 })();

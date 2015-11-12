@@ -1,100 +1,63 @@
-(function() {
+;(function() {
+	'use strict';
+	
 	angular.module('APTPS_ngCPQ').service('RemoteService', RemoteService); 
-	RemoteService.$inject = ['$q', '$log', 'RemoteActions'];
-	function RemoteService($q, $log, RemoteActions) {
+	RemoteService.$inject = ['$q', '$log', 'BaseConfigService'];
+	function RemoteService($q, $log, BaseConfigService) {
 		var service = this;
-		var lastTransaction = {};
+		var actionsMap = {};
+		var redirectOnFail = '/';
+		initRemoteActionFunctions();
 
-		/**
+		function initRemoteActionFunctions() {
+			var actionKey, actionName, isProp, isStr;
+			for (actionKey in BaseConfigService.RemoteActions) {
+				isProp = BaseConfigService.RemoteActions.hasOwnProperty(actionKey);
+				isStr = typeof actionKey === 'string';
+				if (isProp && isStr) {
+					actionName = BaseConfigService.RemoteActions[actionKey];
+					service[actionKey] = createRemoteActionFunction(actionName);
+				}
+			}
+		}
+
+        /**
+		* Used for generating methods that can be called on the service by the name
+		* 	declared in the RemoteActions object.
 		* Each method passes its fully-qualified name and its
-		* 
-		arguments to invokeRemoteAction. The arguments passed
-		* 
-		to this function should just match the signature of 
-		* 
-		the Apex method. 
+		* 	arguments to invokeRemoteAction. The arguments passed
+		* 	to this function should just match the signature of 
+		* 	the Apex method. 
 		* @return {promise} resolves with the result of the remote action
 		*/
-		service.getMiniCartLines = function getMiniCartLines() {
-			return invokeRemoteAction(RemoteActions.getMiniCartLines, arguments);
+		function createRemoteActionFunction(actionName) {
+			var actionFunction = function() {
+				return invokeRemoteAction(actionName, arguments);
 
-		};
-		service.configureLineItem = function configureLineItem() {
-			return invokeRemoteAction(RemoteActions.configureLineItem, arguments);
-
-		};
-		service.deleteLineItemFromCart = function deleteLineItemFromCart() {
-			return invokeRemoteAction(RemoteActions.deleteLineItemFromCart, arguments);
-
-		};
-		service.getServiceLocations = function getServiceLocations() {
-			return invokeRemoteAction(RemoteActions.getServiceLocations, arguments);
-
-		};
-		service.getPricingMatrixData = function getPricingMatrixData() {
-			return invokeRemoteAction(RemoteActions.getPricingMatrixData, arguments);
-
-		};
-		service.getproductoptiongroupsData = function getproductoptiongroupsData() {
-			return invokeRemoteAction(RemoteActions.getproductoptiongroupsData, arguments);
-
-		};
-		service.getPAVFieldMetaData = function getPAVFieldMetaData() {
-			return invokeRemoteAction(RemoteActions.getPAVFieldMetaData, arguments);
+			};
+			return actionFunction;
+		}
 		
-		};
-		service.getProductAttributeConfigData = function getProductAttributeConfigData() {
-			return invokeRemoteAction(RemoteActions.getProductAttributeConfigData, arguments);
-
-		};
-		service.getProductAttributeValueData = function getProductAttributeValueData(){
-			return invokeRemoteAction(RemoteActions.getProductAttributeValueData, arguments);
-		
-		};
-		service.saveQuoteConfig = function saveQuoteConfig() {
-			return invokeRemoteAction(RemoteActions.saveQuoteConfig, arguments);
-
-		};
-		service.runConstraintRules = function runConstraintRules() {
-			return invokeRemoteAction(RemoteActions.runConstraintRules, arguments);
-
-		};
-		service.getProducts = function getProducts() {
-			return invokeRemoteAction(RemoteActions.getProducts, arguments);
-		
-		};
-		service.getDependencyAttributes = function getDependencyAttributes(){
-            return invokeRemoteAction(RemoteActions.getDependencyAttributes, arguments);
-        };
-
-		
-		//Expose general-purpose method
-		service.invokeRemoteAction = invokeRemoteAction;
 		/**
-		* Helper for calling visualforce remoting. May want to pull this out into another service,
-		* or a method on the RemoteActions constant object.
+		* Helper for calling visualforce remoting. 
 		*  
-		* @param 
-		{string} actionName the remote action to invoke
-		* @param 
-		{array} actionParams
-		any number of parameters to pass to remote
-		*          
-		action before callback 
+		* @param 	{string}	actionName 	the remote action to invoke
+		* @param 	{array}		actionParams	any number of parameters to pass to remote
+		*          												action before callback 
 		* @return {promise} a $q promise that resolves with result of remote action
 		*
 		* Example: 
-		* 
-		<code>
-		* 
-		var thenable = invokeRemoteAction(RemoteActions.getCartLineItems, [cartRequest]);
-		* 
-		</code>
+		* 		<code>
+		* 		var thenable = invokeRemoteAction(RemoteActions.getCartLineItems, [cartRequest]);
+		* 		thenable.then(function (result) {
+		* 			useResult(result);
+		* 		});
+		* 		</code>
 		* Here, thenable will be a promise that gets resolved with the result of the remote action 
 		*/
 		function invokeRemoteAction(actionName, actionParams) {
 			//Constuct deferred object for return
-			$log.log('invokeRemoteAction for: '+actionName);
+			$log.info('invokeRemoteAction for: '+actionName);
 			var deferred, errorMessage, remoteActionWithParams, resolver, remotingParams;
 			deferred = $q.defer();
 			if (!actionName || typeof actionName !== 'string') {
@@ -124,9 +87,16 @@
 				if (event.status) {
 					deferred.resolve(result);
 				} else {
-					$log.error(event.message);
-					deferred.reject(event.message);
+					errorMessage = 'Error - Could not invoke remote action: ' + actionName; 
+					$log.error(errorMessage, actionParams, event.message);
+					//Currently the only way to check whether request failed due to user logout
+					var isLoggedOut = event.message.toLowerCase().indexOf('logged') >= 0;
+					if (isLoggedOut && redirectOnFail) {
+						$window.location.href = redirectOnFail;
 
+					}
+					deferred.reject(event);
+					// deferred.reject(event.message);
 				}
 			};
 			remoteActionWithParams.push(resolver);

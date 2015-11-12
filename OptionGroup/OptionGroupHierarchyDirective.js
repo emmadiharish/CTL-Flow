@@ -1,13 +1,22 @@
-(function() {
-    var OptionGroupHierarchyController;
+/**
+ * Directive: OptionGroupHierarchyDirective 
+ */
+ /*
+    OptionGroupHierarchyController controller should be changed later because this was build under assumotion that one product can only belong to one option group.
+    componentId should be used instead of productId for parentId to create hierarchy or rendering sub option groups.
+*/
+;(function() {
+	'use strict';
 
-    OptionGroupHierarchyController = function($scope, $log, QuoteDataService, OptionGroupDataService) {
+	function OptionGroupHierarchyController($scope, $log, BaseConfigService, OptionGroupDataService) {
     	// all variable intializations.
-        $scope.init = function(){
-			$scope.productGroupList =[];// to load hierarchy
+        var ghCtrl  = this;
+
+        function init(){
 			$scope.optionGroupService = OptionGroupDataService;
 
-			$scope.renderhierarchy();
+			ghCtrl.productGroupList =[];// to load hierarchy
+			// renderhierarchy();
 		}
 
 		$scope.$watch('optionGroupService.getrerenderHierarchy()', function(newVal, oldVal) {
@@ -15,29 +24,28 @@
 			if(newVal != oldVal
 				&& newVal == true)
 			{
-				$scope.renderhierarchy();
-				$scope.optionGroupService.setrerenderHierarchy(false);
+				renderhierarchy();
+				OptionGroupDataService.setrerenderHierarchy(false);
 			}
 		});
 
-		$scope.rendercurrentproductoptiongroups = function(arg1, arg2, arg3){
-			$scope.optionGroupService.setslectedOptionGroupProdId(arg1);
+		ghCtrl.rendercurrentproductoptiongroups = function(arg1, arg2, arg3){
+			OptionGroupDataService.setslectedOptionGroupProdId(arg1);
 		}
 
-    	$scope.renderhierarchy = function(){
-            var selectedproducts = [QuoteDataService.getbundleproductId()];
-            var allOptionGroups = $scope.optionGroupService.getallOptionGroups();
+    	function renderhierarchy(){
+            var selectedproducts = [BaseConfigService.lineItem.bundleProdId];
+            var allOptionGroups = OptionGroupDataService.getallOptionGroups();
 
             var  productGroupList = [
-                { "groupName" : QuoteDataService.getbundleproductName(), "groupId" : QuoteDataService.getbundleproductId(), "Parent": "", "isproduct" : true}];
+                { "groupName" : BaseConfigService.lineItem.bundleProdName, "groupId" : BaseConfigService.lineItem.bundleProdId, "Parent": "", "isproduct" : true}];
             _.each(allOptionGroups, function(optiongroups, bundleprodId){
                 if(selectedproducts.indexOf(bundleprodId) > -1)
                 {
                     _.each(optiongroups, function(optiongroup){
                         productGroupList.push({"groupName" : optiongroup.groupName, "groupId" : optiongroup.groupId, "Parent": optiongroup.parentId, "isproduct" : false});
                         _.each(optiongroup.productOptionComponents, function(productcomponent){
-                            if((productcomponent.isselected && optiongroup.ischeckbox)
-                                || (productcomponent.productId == optiongroup.selectedproduct && !optiongroup.ischeckbox))
+                            if(productcomponent.isselected)
                             {
                                 productGroupList.push({"groupName" : productcomponent.productName, "groupId" : productcomponent.productId, "Parent": optiongroup.groupId, "isproduct" : true});
                                 selectedproducts.push(productcomponent.productId);
@@ -50,7 +58,7 @@
             Array.prototype.insertChildAtId = function (strId, objChild)
             {
                 // Beware, here there be recursion
-                found = false;
+                var found = false;
                 _.each(this, function(node){
                     if (node.groupId == strId)
                     {
@@ -91,12 +99,39 @@
                 }
             }
 
-            $scope.productGroupList = target;
+            ghCtrl.productGroupList = target;
         }
    		
-   		$scope.init();
+   		init();
    	};
 
-   	OptionGroupHierarchyController.$inject = ['$scope', '$log', 'QuoteDataService', 'OptionGroupDataService'];
-	angular.module('APTPS_ngCPQ').controller('OptionGroupHierarchyController', OptionGroupHierarchyController);
+   	OptionGroupHierarchyController.$inject = ['$scope', 
+   												'$log', 
+   												'BaseConfigService', 
+   												'OptionGroupDataService'];
+
+	angular.module('APTPS_ngCPQ').directive('optionGroupsHierarchy', OptionGroupHierarchy);
+
+	OptionGroupHierarchy.$inject = ['SystemConstants'];
+	function OptionGroupHierarchy(SystemConstants){
+		// Runs during compile
+		return {
+			// name: '',
+			// priority: 1,
+			// terminal: true,
+			scope: {}, // {} = isolate, true = child, false/undefined = no change
+			controller: OptionGroupHierarchyController,
+			controllerAs: 'ghCtrl',
+			// require: 'ngModel', // Array = multiple requires, ? = optional, ^ = check parent elements
+			restrict: 'AE', // E = Element, A = Attribute, C = Class, M = Comment
+			//template: '<div>pageHeader</div>',
+			templateUrl: SystemConstants.baseUrl + "/Templates/OptionGroupHierarchyView.html",
+			// replace: true,
+			// transclude: true,
+			// compile: function(tElement, tAttrs, function transclude(function(scope, cloneLinkingFn){ return function linking(scope, elm, attrs){}})),
+			//link: function(cartCtrl, iElm, iAttrs, controller) {
+			//}
+			bindToController: true
+		};
+	}
 }).call(this);
