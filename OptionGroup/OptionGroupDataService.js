@@ -10,11 +10,10 @@
                                         'BaseService', 
                                         'BaseConfigService', 
                                         'RemoteService', 
-                                        'MessageService', 
                                         'ProductDataService', 
                                         'OptionGroupCache',
                                         'LocationDataService'];
-    function OptionGroupDataService($q, $log, BaseService, BaseConfigService, RemoteService, MessageService, ProductDataService, OptionGroupCache, LocationDataService) {
+    function OptionGroupDataService($q, $log, BaseService, BaseConfigService, RemoteService, ProductDataService, OptionGroupCache, LocationDataService) {
         var service = this;
         
         var Selectedoptionproduct = {};// to render option attributes.
