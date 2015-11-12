@@ -47,7 +47,7 @@
                 || attrCtrl.SeatCountForBundle != null){
                 attrCtrl.productAttributeValues['Total_Seats__c'] = attrCtrl.SeatCountForBundle;
             }
-            attrCtrl.retrieveproductattributeGroupData();
+            retrieveproductattributeGroupData();
         });
         
         // Note : this method should be invoked only when remotecallinitiated flag is false;
