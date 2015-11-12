@@ -12,7 +12,7 @@
         function init(){
         	$scope.locationService = LocationDataService;
             $scope.baseService = BaseService;
-            $scope.OptionGrpService = OptionGroupDataService;
+            $scope.optionGroupService = OptionGroupDataService;
 
             attrCtrl.constants = SystemConstants;
             attrCtrl.baseConfig = BaseConfigService;
@@ -42,8 +42,8 @@
             }    
         });
 
-        $scope.$watch('OptionGrpService.seatTypeCount', function(newVal, oldVal){
-            attrCtrl.SeatCountForBundle = attrCtrl.OptionGrpService.seatTypeCount;
+        $scope.$watch('optionGroupService.seatTypeCount', function(newVal, oldVal){
+            attrCtrl.SeatCountForBundle = attrCtrl.optionGroupService.seatTypeCount;
             //if($scope.productAttributeValues.hasOwnProperty('Total_Seats__c') && $scope.SeatCountForBundle > 0){
             if(attrCtrl.SeatCountForBundle != 'undefined' 
                 || attrCtrl.SeatCountForBundle != null){
