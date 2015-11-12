@@ -2,8 +2,8 @@
 	'use strict';
     
     angular.module('APTPS_ngCPQ').service('ProductAttributeConfigDataService', ProductAttributeConfigDataService); 
-	ProductAttributeConfigDataService.$inject = ['$q', '$log', 'BaseService', 'BaseConfigService', 'RemoteService', 'OptionGroupDataService', 'ProductAttributeConfigCache'];
-	function ProductAttributeConfigDataService($q, $log, BaseService, BaseConfigService, RemoteService, OptionGroupDataService, ProductAttributeConfigCache) {
+	ProductAttributeConfigDataService.$inject = ['$q', '$log', 'BaseService', 'BaseConfigService', 'RemoteService', 'OptionGroupDataService', 'ProductAttributeConfigCache', 'PAVObjConfigService'];
+	function ProductAttributeConfigDataService($q, $log, BaseService, BaseConfigService, RemoteService, OptionGroupDataService, ProductAttributeConfigCache, PAVObjConfigService) {
 		var service = this;
 		
 		var bundleAttribueFields = [];
