@@ -20,8 +20,6 @@
             prompt: []
         };
 
-        service.clearAll = clearAll;
-
         service.addMessage = function(ruleType, msg){
             messages[0] = angular.copy(messageTemplate);
             
