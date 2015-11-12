@@ -4,7 +4,7 @@
 ;(function() {
 	'use strict';
 	
-	function BundleAttributesController($scope, SystemConstants, $sce, BaseService, BaseConfigService, LocationDataService, ProductAttributeConfigDataService, ProductAttributeValueDataService, PAVObjConfigService) {
+	function BundleAttributesController($scope, SystemConstants, $sce, BaseService, BaseConfigService, LocationDataService, ProductAttributeConfigDataService, ProductAttributeValueDataService, PAVObjConfigService, OptionGroupDataService) {
 		// all variable intializations.
         var remotecallinitiated = false;
         var attrCtrl = this;
@@ -12,13 +12,16 @@
         function init(){
         	$scope.locationService = LocationDataService;
             $scope.baseService = BaseService;
-            
+            $scope.OptionGrpService = OptionGroupDataService;
+
             attrCtrl.constants = SystemConstants;
             attrCtrl.baseConfig = BaseConfigService;
 
             attrCtrl.AttributeGroups = [];// attribute config groups for main bundle.
             attrCtrl.pavfieldDescribeMap = {};
             attrCtrl.productAttributeValues = {};
+
+            attrCtrl.SeatCountForBundle = 0;
         }
 
         $scope.$watch('locationService.getselectedlpa()', function(newVal, oldVal) {
@@ -37,6 +40,19 @@
             {   
                 retrieveproductattributeGroupData();
             }    
+        });
+
+        $scope.$watch('OptionGrpService.seatTypeCount', function(newVal, oldVal){
+            attrCtrl.SeatCountForBundle = attrCtrl.OptionGrpService.seatTypeCount;
+            //if($scope.productAttributeValues.hasOwnProperty('Total_Seats__c') && $scope.SeatCountForBundle > 0){
+            if(attrCtrl.SeatCountForBundle != 'undefined' 
+                || attrCtrl.SeatCountForBundle != null){
+                attrCtrl.productAttributeValues['Total_Seats__c'] = attrCtrl.SeatCountForBundle;
+            }
+            if(remotecallinitiated == false)
+            {
+                attrCtrl.retrieveproductattributeGroupData();
+            }
         });
         
         // Note : this method should be invoked only when remotecallinitiated flag is false;
@@ -77,6 +93,7 @@
             // clear the previous option attribute groups.
             PAVObjConfigService.configurePAVFields(attrCtrl.AttributeGroups, attrCtrl.productAttributeValues);
             ProductAttributeValueDataService.setbundleproductattributevalues(attrCtrl.productAttributeValues);
+            totalSeatCheck();
         }
         
         attrCtrl.PAVPicklistChange = function(fieldName){
@@ -88,6 +105,17 @@
             return $sce.trustAsHtml(value);
         };
 
+        //Set Total Seat Count When quantity is changed on Option level.
+        function totalSeatCheck(){
+            _.each(attrCtrl.AttributeGroups,  function(attributeGrp){
+                _.each(attributeGrp.productAtributes, function(attribute){
+                    if(attribute.fieldName == 'Total_Seats__c'){
+                        attribute.isReadOnly = true;
+                    }
+                });
+            });
+        }
+
         init();
 	};
     BundleAttributesController.$inject = ['$scope', 
@@ -98,7 +126,8 @@
                                            'LocationDataService', 
                                            'ProductAttributeConfigDataService', 
                                            'ProductAttributeValueDataService', 
-                                           'PAVObjConfigService'];
+                                           'PAVObjConfigService',
+                                           'OptionGroupDataService'];
 
 	BundleAttributes.$inject = ['SystemConstants'];
 	function BundleAttributes(SystemConstants){

@@ -25,6 +25,9 @@
         var currentSubBundleLevel = 0;
         var maxSubBundleLevel = 5;// constant to limit the option group recursive remote call.
         
+        var showOptions = true;
+        var isZLocSet = false;
+        
         // option group methods.
         service.getallOptionGroups = getallOptionGroups;
         service.getOptionGroup = getOptionGroup;
@@ -35,6 +38,16 @@
         service.setrerenderHierarchy = setrerenderHierarchy;
         service.getslectedOptionGroupProdId = getslectedOptionGroupProdId;
         service.setslectedOptionGroupProdId = setslectedOptionGroupProdId;
+
+        service.LocationAValue = '';
+        service.LocationZValue = '';
+        service.currentOptionGroupName = '';
+        service.seatTypeCount = 0;
+
+        service.setZLocationFlag = setZLocationFlag;
+        service.getAttributeLocation = getAttributeLocation;
+        service.getTotalSeatValidation = getTotalSeatValidation;
+        service.getProdOptionsCascade = getProdOptionsCascade;
         
         function getallOptionGroups(){
             return OptionGroupCache.getOptionGroups();
@@ -154,6 +167,89 @@
 
         function setslectedOptionGroupProdId(val){
             slectedOptionGroupProdId = val;
+        }
+
+        function setZLocationFlag(optionGroups){
+            _.each(optionGroups, function(group){
+                if(group.groupName.indexOf('Location Z') != -1){
+                    isZLocSet = true;
+                }                   
+                _.each(group.productOptionComponents, function(optionComponent){
+                    if(optionComponent.productId == group.selectedproduct){
+                        optionComponent['isLocationZ'] = isZLocSet;
+                    }
+                });
+            });
+        }
+
+        function getAttributeLocation(selectedLoc, allLocations, configPAVs){
+            var currentAttributeLocation = '';
+            var locZId = '';
+            var locZValue = '';
+            
+            if(_.isEmpty(service.LocationZValue)){
+                _.each(configPAVs, function(locItem){
+                    if(_.has(locItem, 'Location_Z__c')){
+                        locZId = locItem['Location_Z__c'];
+                    }
+                });
+                if(!_.isEmpty(locZId)){
+                    _.each(allLocations, function(locItem){
+                        if(locItem.Id == locZId)
+                            locZValue = locItem;
+                    });
+                }
+                
+            }else{
+                _.each(allLocations, function(locItem){
+                    if(locItem.Name == service.LocationZValue)
+                        locZValue = locItem;
+                });
+            }           
+            
+            if(!_.isEmpty(service.currentOptionGroupName)){
+                if(service.currentOptionGroupName.indexOf('Location Z') != -1 && !_.isEmpty(locZValue)){                    
+                    currentAttributeLocation = locZValue;                   
+                }else{
+                    currentAttributeLocation = selectedLoc;
+                }
+            }
+            return currentAttributeLocation;
+        }
+
+        function getTotalSeatValidation(currentOptionGroups){
+            var seatCount = 0;
+            _.each(currentOptionGroups, function(groups){
+                _.each(groups.productOptionComponents, function(optionItem){
+                    if(groups.ischeckbox){
+                        if(optionItem.includeInTotalSeatsCalc && optionItem.isselected){
+                            seatCount += optionItem.quantity;
+                        }
+                    }else{
+                        if(groups.hasOwnProperty('selectedproduct')){
+                            if(groups.selectedproduct != null || groups.selectedproduct != '' || groups.selectedproduct != 'undefined'){
+                                if(groups.selectedproduct == optionItem.productId  && optionItem.includeInTotalSeatsCalc){
+                                    seatCount += optionItem.quantity;
+                                }
+                            }
+                        }
+                    }                   
+                });
+            });
+            
+            service.seatTypeCount = seatCount;
+            
+            return seatCount;
+        }
+
+        function getProdOptionsCascade(prodOptions){
+            _.each(prodOptions, function(optionGrps){
+                _.each(optionGrps.productOptionComponents, function(item){
+                    if(item.isselected && item.includeInTotalSeatsCalc)
+                        item.quantity = $scope.quantityCascade;
+                });
+            });
+            return prodOptions;
         }
     }
 })();

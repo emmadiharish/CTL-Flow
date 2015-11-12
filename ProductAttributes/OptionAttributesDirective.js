@@ -5,8 +5,10 @@
     'use strict';
 
     function OptionAttributesController($scope, $log, $sce, SystemConstants, LocationDataService, OptionGroupDataService, ProductAttributeConfigDataService, ProductAttributeValueDataService, PAVObjConfigService) {
-        var depattributes = {};
         var attrCtrl = this;
+
+        // multi-location support for E-line.
+        var zLoc = '';
 
         function init(){
             // all variable intializations.
@@ -51,12 +53,12 @@
         $scope.$watchCollection('PAVService.getbundleproductattributevalues()', function(newValue){ 
             if(!_.isEmpty(newValue))
             {
-                attrCtrl.CascadeBunleAttributestoOptions();
+                CascadeBunleAttributestoOptions();
                 PAVObjConfigService.configurePAVFields(attrCtrl.AttributeGroups, attrCtrl.productAttributeValues);
             }
         });
 
-        attrCtrl.CascadeBunleAttributestoOptions = function(){
+        function CascadeBunleAttributestoOptions(){
             // get attribute config fields for bundle product and clone them.
             var bundlePAV = ProductAttributeValueDataService.getbundleproductattributevalues();
             var bunleAttributeFields = ProductAttributeConfigDataService.getBundleAttributeFields();
@@ -64,8 +66,6 @@
             _.each(bunleAttributeFields, function(field){
                 optionPAV[field] = bundlePAV[field];
             });
-            // var res = PAVObjConfigService.configurePAVFields(attrCtrl.AttributeGroups, optionPAV);
-            // optionPAV = res.PAVObj;
         }
             
 
@@ -77,8 +77,6 @@
             ProductAttributeConfigDataService.getProductAttributesConfig(productId, alllocationIdSet, selectedlocationId).then(function(attributeconfigresult) {
                 ProductAttributeValueDataService.getProductAttributeValues(componentId).then(function(pavresult)
                 {
-                    // var res = PAVObjConfigService.configurePAVFields(attributeconfigresult, pavresult);
-                    // $scope.optionDynamicAttributeValidation(res.pavConfigGroups);
                     setOptionAttributes(attributeconfigresult, pavresult);
                     renderOptionAttributes();
                 })
@@ -92,74 +90,48 @@
 
         function renderOptionAttributes(){
             // clear the previous option attribute groups.
-            attrCtrl.CascadeBunleAttributestoOptions();
+            CascadeBunleAttributestoOptions();
             PAVObjConfigService.configurePAVFields(attrCtrl.AttributeGroups, attrCtrl.productAttributeValues);
-            attrCtrl.optionLevelAttributeChange();
-            attrCtrl.seatTypeExpressions();
+            optionLevelAttributeChange();
+            seatTypeExpressions();
+            eLinePAVAttributes(); 
             //$scope.safeApply();
         }
 
         attrCtrl.PAVPicklistChange = function(fieldName){
             renderOptionAttributes();
+            ProductAttributeConfigDataService.setMultiSiteLocations(attrCtrl.productAttributeValues, LocationDataService.zLocations);
         }
 
-        attrCtrl.optionLevelAttributeChange = function(){
+        function optionLevelAttributeChange(){
             var optionAttributes = attrCtrl.productAttributeValues;
-            if(_.has(optionAttributes, 'Ethernet_Local_Access_Speed__c')
-                && !_.isNull(optionAttributes['Ethernet_Local_Access_Speed__c'])){
-                depattributes['AccessSpeed'] = optionAttributes['Ethernet_Local_Access_Speed__c'];
-            }
-            
-            if(_.has(optionAttributes, 'Billing_Type__c') 
-                && !_.isNull(optionAttributes['Billing_Type__c'])){
-                depattributes['BillingType'] = optionAttributes['Billing_Type__c'];
-            }
-            
-            if(_.has(depattributes, 'AccessSpeed') 
-                && _.has(depattributes, 'BillingType')){
-                var portOptions = PAVObjConfigService.getPortOptions();
-                var filteredPortOption = _.findWhere(portOptions, {'Local_Access_Speed__c': depattributes.AccessSpeed, 'Billing_Type__c': depattributes.BillingType});
-                if(_.has(filteredPortOption, 'Bandwidth__c') 
-                    && _.has(filteredPortOption, 'Circuit_Speed__c')){
-                    
-                    var Bandwidth = [];
-                    var CircuitSpeed = [];
-                    var BandwidthSplitted = [];
-                    var CircuitSpeedSplitted = [];
-
-                    BandwidthSplitted = filteredPortOption['Bandwidth__c'].split(', ');
-                    CircuitSpeedSplitted = filteredPortOption['Circuit_Speed__c'].split(', ');                      
-                    
-                    Bandwidth = PAVObjConfigService.getPicklistValues(PAVObjConfigService.prepareOptionsList(BandwidthSplitted));
-                    CircuitSpeed = PAVObjConfigService.getPicklistValues(PAVObjConfigService.prepareOptionsList(CircuitSpeedSplitted));
-                    
-                    _.each(attrCtrl.AttributeGroups, function(eachgroup){
-                        _.each(eachgroup.productAtributes, function(eachattribute){
-                            if(eachattribute.fieldName == 'Bandwidth__c'){
-                                eachattribute.picklistValues = Bandwidth;
-                                attrCtrl.productAttributeValues['Bandwidth__c'] = null;
-                            }
-                            
-                            if(eachattribute.fieldName == 'Access_Speed__c'){
-                                eachattribute.picklistValues = CircuitSpeed;
-                                attrCtrl.productAttributeValues['Access_Speed__c'] = null;
-                            }
-                        });
-                    });
-                }
+            var portOptions = PAVObjConfigService.getPortOptions();
+            var result = ProductAttributeConfigDataService.optionAttributeChangeConstraint(optionAttributes, portOptions, $scope.AttributeGroups, $scope.productAttributeValues);
+            if(!_.isEmpty(result)){
+                attrCtrl.AttributeGroups = result[0].AttributeGroups;
+                attrCtrl.productAttributeValues = result[0].productAttributeValues;
             }
         }
 
-        attrCtrl.seatTypeExpressions = function(){
-            var count = OptionGroupDataService.seatTypeCount;
-            _.each(attrCtrl.AttributeGroups, function(attrGroups){
-                _.each(attrGroups.productAtributes, function(item){
-                    if(item.fieldName == 'Total_Seats__c'){
-                        item.isReadOnly = true;
-                        attrCtrl.productAttributeValues['Total_Seats__c'] = count;
-                    }
-                });
-            });
+        function seatTypeExpressions(){
+            ProductAttributeConfigDataService.seatTypeExpressions(attrCtrl.AttributeGroups, attrCtrl.productAttributeValues);
+        }
+
+        function eLinePAVAttributes(){
+            var selectedSR = LocationDataService.getselectedlpa();
+            var zLocations = LocationDataService.zLocations;
+
+            if((selectedSR != null || selectedSR != 'undefined') && (_.size(zLocations) > 0)){
+                attrCtrl.AttributeGroups = ProductAttributeConfigDataService.getLocationsCheck(attrCtrl.AttributeGroups, selectedSR, zLocations);                
+                attrCtrl.productAttributeValues = ProductAttributeConfigDataService.setProductAttributeValues(attrCtrl.productAttributeValues, selectedSR, zLoc);
+            }           
+            if(_.has(attrCtrl.productAttributeValues, 'Location_Z__c') && attrCtrl.productAttributeValues['Location_Z__c'] != null){
+                ProductAttributeConfigDataService.setSelectedLocationZ = attrCtrl.productAttributeValues['Location_Z__c'];
+            }
+        }
+
+        function getLocationZ(pav){
+            zLoc = ProductAttributeConfigDataService.getLocationZ(pav);         
         }
 
         attrCtrl.trustAsHtml = function(value) {

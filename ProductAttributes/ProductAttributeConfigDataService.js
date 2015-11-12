@@ -7,12 +7,19 @@
 		var service = this;
 		
 		var bundleAttribueFields = [];
-
+        var isLocationZ = false;
+        var depattributes = {};
+        
 		// product attribute methods.
 		service.getProductAttributesConfig = getProductAttributesConfig;
 		service.getDynamicGroups = getDynamicGroups;
 		service.getBundleAttributeFields = getBundleAttributeFields;
 		service.setBundleAttributeFields = setBundleAttributeFields;
+
+        service.setMultiSiteLocations = setMultiSiteLocations;
+        service.optionAttributeChangeConstraint = optionAttributeChangeConstraint;
+        service.seatTypeExpressions = seatTypeExpressions;
+        service.getLocationZ = getLocationZ;
 		
 		function getProductAttributesConfig_bulk(servicelocationIdSet, productIds, groupIds) {
 			// check if cachedProductAttributes has products requested for else make a remote call.
@@ -156,6 +163,239 @@
 
         function getBundleAttributeFields(){
         	return bundleAttribueFields;
+        }
+
+        function optionAttributeChangeConstraint(optionAttributes, portOptions, AttributeGroups, productAttributeValues){
+            var filteredPortOption = ''
+            var Bandwidth = [];
+            var CircuitSpeed = [];
+            var BillingType = [];
+            var BandwidthSplitted = [];
+            var CircuitSpeedSplitted = [];
+            var BillingTypeSplitted = [];
+            var bandwidthIs = false;
+            var circuitSpeedIs = false;
+            var billingTypeIs = false;
+            var result = [];
+                        
+            
+            if(_.has(optionAttributes, 'Ethernet_Local_Access_Speed__c')
+                && !_.isNull(optionAttributes['Ethernet_Local_Access_Speed__c'])){
+                depattributes['AccessSpeed'] = optionAttributes['Ethernet_Local_Access_Speed__c'];
+            }
+            
+            if(_.has(optionAttributes, 'Billing_Type__c') 
+                && !_.isNull(optionAttributes['Billing_Type__c'])){
+                depattributes['BillingType'] = optionAttributes['Billing_Type__c'];
+            }
+            
+            _.each(portOptions, function(option){
+                if(option['Local_Access_Speed__c'] == depattributes.AccessSpeed){
+                    BillingTypeSplitted.push(option['Billing_Type__c']);
+                    if(option['Billing_Type__c'] == productAttributeValues['Billing_Type__c']){
+                        billingTypeIs = true;
+                    }
+                }
+            });
+            
+            BillingType = PAVObjConfigService.getPicklistValues(PAVObjConfigService.prepareOptionsList(BillingTypeSplitted));
+            
+            if(_.has(depattributes, 'AccessSpeed') 
+                && _.has(depattributes, 'BillingType')){                
+                filteredPortOption = _.findWhere(portOptions, {'Local_Access_Speed__c': depattributes.AccessSpeed, 'Billing_Type__c': depattributes.BillingType});
+                if(_.has(filteredPortOption, 'Bandwidth__c') 
+                    && _.has(filteredPortOption, 'Circuit_Speed__c')){
+                    
+                    BandwidthSplitted = filteredPortOption['Bandwidth__c'].split(', ');
+                    CircuitSpeedSplitted = filteredPortOption['Circuit_Speed__c'].split(', ');                      
+                    
+                    Bandwidth = PAVObjConfigService.getPicklistValues(PAVObjConfigService.prepareOptionsList(BandwidthSplitted));
+                    CircuitSpeed = PAVObjConfigService.getPicklistValues(PAVObjConfigService.prepareOptionsList(CircuitSpeedSplitted));
+                    
+                    _.each(Bandwidth, function(item){
+                        if(item.value != null && (item.value == productAttributeValues['Bandwidth__c'])){
+                            bandwidthIs = true;
+                        }
+                    });
+                    
+                    _.each(CircuitSpeed, function(item){
+                        if(item.value != null && (item.value == productAttributeValues['Access_Speed__c'])){
+                            circuitSpeedIs = true;
+                        }
+                    });
+                    
+                    _.each(AttributeGroups, function(eachgroup){
+                        _.each(eachgroup.productAtributes, function(eachattribute){
+                            if(eachattribute.fieldName == 'Bandwidth__c'){
+                                eachattribute.picklistValues = Bandwidth;
+                                if(!bandwidthIs){
+                                    productAttributeValues['Bandwidth__c'] = Bandwidth[1].label;
+                                }                   
+                            }
+                            
+                            if(eachattribute.fieldName == 'Access_Speed__c'){
+                                eachattribute.picklistValues = CircuitSpeed;
+                                if(!circuitSpeedIs){
+                                    productAttributeValues['Access_Speed__c'] = CircuitSpeed[1].value;
+                                } 
+                            }
+                            
+                            if(eachattribute.fieldName == 'Billing_Type__c'){
+                                eachattribute.picklistValues = BillingType; 
+                                if(!billingTypeIs){
+                                    productAttributeValues['Billing_Type__c'] = '--None--';
+                                }
+                            }
+                            
+                        });
+                    });
+                    result.push({'AttributeGroups':AttributeGroups, 'productAttributeValues':productAttributeValues});
+                }else{
+                    Bandwidth = PAVObjConfigService.getPicklistValues(PAVObjConfigService.prepareOptionsList(BandwidthSplitted));
+                    CircuitSpeed = PAVObjConfigService.getPicklistValues(PAVObjConfigService.prepareOptionsList(CircuitSpeedSplitted));
+                    
+                    _.each(AttributeGroups, function(eachgroup){
+                        _.each(eachgroup.productAtributes, function(eachattribute){
+                            if(eachattribute.fieldName == 'Bandwidth__c'){
+                                eachattribute.picklistValues = Bandwidth;
+                                productAttributeValues['Bandwidth__c'] = '--None--';
+                            }
+                            
+                            if(eachattribute.fieldName == 'Access_Speed__c'){
+                                eachattribute.picklistValues = CircuitSpeed;
+                                productAttributeValues['Access_Speed__c'] = '--None--';
+                            }
+                        });
+                    });
+                    
+                    result.push({'AttributeGroups':AttributeGroups, 'productAttributeValues':productAttributeValues});
+                }
+            }
+            if(_.has(depattributes, 'AccessSpeed') 
+                && !_.has(depattributes, 'BillingType')){
+                
+                Bandwidth = PAVObjConfigService.getPicklistValues(PAVObjConfigService.prepareOptionsList(BandwidthSplitted));
+                CircuitSpeed = PAVObjConfigService.getPicklistValues(PAVObjConfigService.prepareOptionsList(CircuitSpeedSplitted));
+                
+                _.each(AttributeGroups, function(eachgroup){
+                    _.each(eachgroup.productAtributes, function(eachattribute){
+                        if(eachattribute.fieldName == 'Bandwidth__c'){
+                            eachattribute.picklistValues = Bandwidth;                                
+                            productAttributeValues['Bandwidth__c'] = '--None--';                                  
+                        }
+                        
+                        if(eachattribute.fieldName == 'Access_Speed__c'){
+                            eachattribute.picklistValues = CircuitSpeed;
+                            productAttributeValues['Access_Speed__c'] = '--None--';
+                        }
+                        
+                        if(eachattribute.fieldName == 'Billing_Type__c'){
+                             eachattribute.picklistValues = BillingType; 
+                             if(!billingTypeIs){
+                                productAttributeValues['Billing_Type__c'] = '--None--';
+                             }
+                        }
+                    });
+                });             
+                result.push({'AttributeGroups':AttributeGroups, 'productAttributeValues':productAttributeValues});
+            }
+            
+            return result;
+        }
+
+        function seatTypeExpressions(AttributeGroups, productAttributeValues){
+            var count = OptionGroupDataService.seatTypeCount;
+            _.each(AttributeGroups, function(attrGroups){
+                _.each(attrGroups.productAtributes, function(item){
+                    if(item.fieldName == 'Total_Seats__c'){
+                        item.isReadOnly = true;
+                        productAttributeValues['Total_Seats__c'] = count;
+                    }
+                });
+            });
+            return productAttributeValues;
+        }
+
+        // multi-location related.
+        // Applicable for E-Line products.
+        function getLocationsCheck(attributeGrous, selectedSR, allSRs){
+            var locationA = [];
+            var locationZ = [];
+                if(selectedSR != null || selectedSR != 'undefined'){
+                    locationA.push({active:true,defaultValue:false,label:selectedSR.Name, value:selectedSR.Name});
+                }
+                if(allSRs != null || allSRs != 'undefined'){
+                    locationZ.push({active:true,defaultValue:false,label:'--None--', value:'--None--'});
+                    _.each(allSRs, function(item){
+                        locationZ.push({active:true,defaultValue:false,label:item.Name, value:item.Id});
+                    });
+                }
+            _.each(attributeGrous, function(attrGroups){
+                _.each(attrGroups.productAtributes, function(items){
+                    if(items.fieldName == 'Location_A__c'){
+                        items.picklistValues = locationA;
+                        items.isReadOnly = true;
+                    }
+                    if(items.fieldName == 'Location_Z__c'){
+                        items.picklistValues = locationZ;
+                    }
+                });
+            });
+            
+            
+            return attributeGrous;
+        }
+        
+        function checkIfLocationIsZ(optionGroups, selectedProductId, locZ, selectedLoc, optionGroupName){
+            var loc = '';
+            if(optionGroupName != 'undefined' || !_.isEmpty(optionGroupName)){
+                _.each(optionGroups, function(optGroup){
+                    _.each(optGroup.productOptionComponents, function(component){
+                        if(component.productId == selectedProductId && optionGroupName.indexOf('Location Z') != -1 && locZ != null){
+                            loc = locZ;
+                        }
+                        if(component.productId == selectedProductId && optionGroupName.indexOf('Location A') != -1 && selectedLoc != null){
+                            loc = selectedLoc;
+                        }
+                    });
+                });
+            }
+            return loc;
+        }
+        function setMultiSiteLocations(productAttributeValues, allLocations){
+            if(_.has(productAttributeValues, 'Location_A__c')){
+                OptionGroupDataService.LocationAValue = productAttributeValues['Location_A__c'];
+            }
+            if(_.has(productAttributeValues, 'Location_Z__c')){ 
+                _.each(allLocations, function(LocItem){
+                    if(LocItem.Id == productAttributeValues['Location_Z__c']){
+                        OptionGroupDataService.LocationZValue = LocItem.Name;
+                    }
+                });
+            }
+        }
+        
+        function setProductAttributeValues(pavs, selectedSr, zLoc){
+            if(_.has(pavs, 'Location_A__c')){
+                pavs['Location_A__c'] = selectedSr.Name;
+            }
+            if(_.has(pavs, 'Location_Z__c')){
+                pavs['Location_Z__c'] = zLoc;
+            }
+            
+            return pavs;
+        }
+
+        function getLocationZ(pav){ 
+            var zLoc = '';  
+            if(_.has(pav, 'Location_Z__c') 
+                && (pav['Location_Z__c'] == null 
+                || pav['Location_Z__c'] == 'undefined')){
+                zLoc = null;
+            }else{
+                zLoc = pav['Location_Z__c'];
+            }
+            return zLoc;
         }
     }
 })();
