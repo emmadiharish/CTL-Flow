@@ -4,30 +4,48 @@
 ;(function() {
     'use strict';
 
-    function PageMessagesController(MessageService) {
+    function PageMessagesController(PageMessageService) {
         
-        this.messages = function() {
-            return MessageService.messages;
+        var ctrl = this;
+        
+        // ctrl.labels = i18nService.CustomLabel;
+        ctrl.errorMessages = [];
+        ctrl.messageField = 'Message';
+
+        ctrl.pageErrors = function() {
+            return ctrl.messenger.getMessages().page.error;
         };
 
-        this.hasPageMessages = function() {
-            return MessageService.messages.length !== 0;
+        ctrl.pageWarnings = function() {
+            return ctrl.messenger.getMessages().page.warning;
         };
 
-        this.closeMsg = function(index) {
-            //$scope.messages[index].remove();
-            MessageService.removeMessage(index);
+        ctrl.pageInfos = function() {
+            return ctrl.messenger.getMessages().page.info;
         };
 
-        this.closeAlert = function(index) {
-            MessageService.removeMessage(index);
+        ctrl.hasError = function() {
+            return ctrl.messenger.getMessages().page.error.length !== 0;
         };
 
-        return this;
+        ctrl.hasWarning = function() {
+            return ctrl.messenger.getMessages().page.warning.length !== 0;
+        };
 
+        ctrl.hasInfo = function() {
+            return ctrl.messenger.getMessages().page.info.length !== 0;
+        };
+
+        ctrl.hasMessages = function() {
+            return ctrl.hasError() || ctrl.hasWarning() || ctrl.hasInfo();// || ctrl.hasCommonErrors();
+        };
+
+        ctrl.messenger = PageMessageService;
+
+        return ctrl;
     }
 
-    PageMessagesController.$inject = ['MessageService'];
+    PageMessagesController.$inject = ['PageMessageService'];
 
     angular.module('APTPS_ngCPQ').directive('pageMessages', PageMessages);
 
@@ -44,7 +62,7 @@
             // require: 'ngModel', // Array = multiple requires, ? = optional, ^ = check parent elements
             // restrict: 'AE', // E = Element, A = Attribute, C = Class, M = Comment
             //template: '<div>pageHeader</div>',
-            templateUrl: SystemConstants.baseUrl + "/Templates/MessagesView.html",
+            templateUrl: SystemConstants.baseUrl + "/Templates/PageMessagesView.html",
             // replace: true,
             // transclude: true,
             // compile: function(tElement, tAttrs, function transclude(function(scope, cloneLinkingFn){ return function linking(scope, elm, attrs){}})),
