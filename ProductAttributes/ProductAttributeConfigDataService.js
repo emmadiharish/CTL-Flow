@@ -2,10 +2,15 @@
 	'use strict';
     
     angular.module('APTPS_ngCPQ').service('ProductAttributeConfigDataService', ProductAttributeConfigDataService); 
-	ProductAttributeConfigDataService.$inject = ['$q', '$log', 'BaseService', 'BaseConfigService', 'RemoteService', 'OptionGroupDataService', 'ProductAttributeConfigCache', 'PAVObjConfigService'];
-	function ProductAttributeConfigDataService($q, $log, BaseService, BaseConfigService, RemoteService, OptionGroupDataService, ProductAttributeConfigCache, PAVObjConfigService) {
+	ProductAttributeConfigDataService.$inject = ['$q', '$log', 'BaseService', 'BaseConfigService', 'RemoteService', 'OptionGroupDataService', 'PAVObjConfigService'];
+	function ProductAttributeConfigDataService($q, $log, BaseService, BaseConfigService, RemoteService, OptionGroupDataService, PAVObjConfigService) {
 		var service = this;
-		
+        service.isValid = false;
+
+		var cachedProductAttributes = {};
+        var prodductIdtoattributegroupsMap = {};
+        var productIdtodynamicattributegroupMap = {};
+
 		var bundleAttribueFields = [];
         var isLocationZ = false;
         var depattributes = {};
@@ -23,10 +28,9 @@
 		
 		function getProductAttributesConfig_bulk(servicelocationIdSet, productIds, groupIds) {
 			// check if cachedProductAttributes has products requested for else make a remote call.
-			var cachedProductAttributes = ProductAttributeConfigCache.getProductAttributesConfig();
 			var existingproductIds = _.keys(cachedProductAttributes.prodductIdtoattributegroupsMap);
 			var productIds_filtered = _.filter(productIds, function(Id){ return !_.contains(existingproductIds, Id); });
-			if (ProductAttributeConfigCache.isValid
+			if (service.isValid
 				&& productIds_filtered.length < 1) {
 				// logTransaction(cachedProductAttributes);
 				return $q.when(cachedProductAttributes);
@@ -41,24 +45,23 @@
             var requestPromise = RemoteService.getAttributeGroups(attributeGroupRequest);
 			BaseService.startprogress();// start progress bar.
 			return requestPromise.then(function(response){
-				ProductAttributeConfigCache.initializeProductAttributes(response);
+				initializeProductAttributes(response);
 				// logTransaction(response, categoryRequest);
 				BaseService.setPAConfigLoadComplete();
-				return ProductAttributeConfigCache.getProductAttributesConfig();
+				return getProductAttributesConfig();
 			});
 		}
 
 		function getProductAttributesConfig( productId, alllocationIdSet, selectedlocationId) {
 			var productIdset = [], allgroupIds = [];
 			var currentproductoptiongroups = OptionGroupDataService.getcurrentproductoptiongroups();
-            var prodattributeResult = ProductAttributeConfigCache.getProductAttributesConfig();
-			var dynamicgroupId = selectedlocationId != '' ? productId+selectedlocationId : '';
-			if (ProductAttributeConfigCache.isValid
-				&& prodattributeResult != null
-				&& prodattributeResult.prodductIdtoattributegroupsMap != null
-				&& _.has(prodattributeResult.prodductIdtoattributegroupsMap, productId))
+            var dynamicgroupId = selectedlocationId != '' ? productId+selectedlocationId : '';
+			if (serice.isValid
+				&& cachedProductAttributes != null
+				&& cachedProductAttributes.prodductIdtoattributegroupsMap != null
+				&& _.has(cachedProductAttributes.prodductIdtoattributegroupsMap, productId))
 			{
-				var res = buildattributegroups(prodattributeResult.prodductIdtoattributegroupsMap, productId, prodattributeResult.productIdtodynamicattributegroupMap,
+				var res = buildattributegroups(cachedProductAttributes.prodductIdtoattributegroupsMap, productId, cachedProductAttributes.productIdtodynamicattributegroupMap,
 															dynamicgroupId);
 				return $q.when(res);
 			}
@@ -73,32 +76,54 @@
             });
 		}
 
+        function initializeProductAttributes(result) {
+            _.each(result.productIdtoproductgroupIdsMap, function (groupIdsSet, prodId) {
+                var attributeGroups = [];
+                _.each(groupIdsSet, function(groupId){
+                    attributeGroups.push(result.groupIdtoattributegroupMap[groupId]);
+                });
+                
+                prodductIdtoattributegroupsMap[prodId] = attributeGroups;
+            });
+            
+            // dynamic attribute groups.
+            _.each(result.productIdtodynamicattributegroupMap, function (attributeGroup, prodpluslocationId) {
+                productIdtodynamicattributegroupMap[prodpluslocationId] = attributeGroup;
+            });
+
+            cachedProductAttributes = {'prodductIdtoattributegroupsMap' : prodductIdtoattributegroupsMap, 'productIdtodynamicattributegroupMap': productIdtodynamicattributegroupMap};
+
+            service.isValid = true;
+        }
+
 		function getDynamicGroups(groupId){
 			var res = [];
-			var prodattributeResult = ProductAttributeConfigCache.getProductAttributesConfig();
-			if(_.has(prodattributeResult.productIdtodynamicattributegroupMap, groupId))
+			if(_.has(cachedProductAttributes.productIdtodynamicattributegroupMap, groupId))
             {
-                var dynamicgroup = prodattributeResult.productIdtodynamicattributegroupMap[groupId];
+                var dynamicgroup = cachedProductAttributes.productIdtodynamicattributegroupMap[groupId];
                 res.push(dynamicgroup);
             }
             return res;
 		}
 
 		// Util methid. a: product Id to attribute groups map, b: productId, c: product to dynamic group map., d: dynamic group Id.
+        // add dynamic attributes prior to static.
         function buildattributegroups(a, b, c, d){
             var res = [];
+
+            if(_.isObject(c)
+            	&& _.has(c, d))
+            {
+                res.push(c[d]);
+            }
+            
             if(_.has(a, b))
             {
                 _.each(a[b], function(g) {
                     res.push(g);
                 })
             }
-            
-            if(_.isObject(c)
-            	&& _.has(c, d))
-            {
-                res.push(c[d]);
-            }
+
             return res;
         }
 
