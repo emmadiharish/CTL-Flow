@@ -26,8 +26,7 @@
 
         $scope.$watch('locationService.getselectedlpa()', function(newVal, oldVal) {
             if(!_.isEmpty(newVal)
-                && !_.isEqual(newVal, oldVal)
-                && remotecallinitiated == false)
+                && !_.isEqual(newVal, oldVal))
             {   
                 retrieveproductattributeGroupData();
             }    
@@ -35,8 +34,7 @@
 
         $scope.$watch('baseService.getLocationLoadComplete()', function(newVal, oldVal) {
             if(newVal != oldVal
-                && newVal == true
-                && remotecallinitiated == false)
+                && newVal == true)
             {   
                 retrieveproductattributeGroupData();
             }    
@@ -49,16 +47,14 @@
                 || attrCtrl.SeatCountForBundle != null){
                 attrCtrl.productAttributeValues['Total_Seats__c'] = attrCtrl.SeatCountForBundle;
             }
-            if(remotecallinitiated == false)
-            {
-                attrCtrl.retrieveproductattributeGroupData();
-            }
+            attrCtrl.retrieveproductattributeGroupData();
         });
         
         // Note : this method should be invoked only when remotecallinitiated flag is false;
         function retrieveproductattributeGroupData(){
-            // run only if location remote call is complete.
-            if(BaseService.getLocationLoadComplete() == true)
+            // run only if location remote call is complete and attributeconfig remote call is not in progress.
+            if(BaseService.getLocationLoadComplete() == true
+                && remotecallinitiated == false)
             {
                 remotecallinitiated = true;
                 var alllocationIdSet = LocationDataService.getalllocationIdSet();
