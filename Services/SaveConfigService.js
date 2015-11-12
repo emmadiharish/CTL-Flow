@@ -149,7 +149,7 @@
                         })
                     }// end of saveresult.isSuccess check.
                     else{
-                        PageMessageService.addMessage('danger', 'Save call is Failing: '+saveresult.errorMessage);
+                        PageMessageService.addMessage('error', 'Save call is Failing: '+saveresult.errorMessage);
                         BaseService.completeSaveProgress();// end progress bar.
                         // $scope.safeApply();
                         deferred.reject('Save Failed.');
@@ -214,8 +214,8 @@
                     // get all error messages and add to PageMessageService.
                     var TriggeringProductIds = ActionDo.TriggeringProductIds;
                     var Message = ActionDo.Message;
-                    // possible message types : danger, warning, info, success.
-                    var MessageType = ActionDo.MessageType == 'Error' ? 'danger' : ActionDo.MessageType;
+                    // possible message types : error, warning, info.
+                    var MessageType = ActionDo.MessageType == 'Error' ? 'error' : ActionDo.MessageType;
                     var ActionType = ActionDo.ActionType;
                     var ActionIntent = ActionDo.ActionIntent;
                     var SuggestedProductIds = ActionDo.SuggestedProductIds;
@@ -370,7 +370,7 @@
                 && hasLocations)
             {
                 // alert('Please select service location to proceed.');
-                PageMessageService.addMessage('danger', 'Please select location to Proceed.');
+                PageMessageService.addMessage('error', 'Please select location to Proceed.');
                 res = false;
             }
             
@@ -413,13 +413,13 @@
                         if(minOptions > 0
                             && selectedOptionsCount < minOptions)
                         {
-                            PageMessageService.addMessage('danger', 'Minimum of '+minOptions+' options have to be selected in '+optiongroup.groupName);
+                            PageMessageService.addMessage('error', 'Minimum of '+minOptions+' options have to be selected in '+optiongroup.groupName);
                             res = false;
                         }
                         if(maxOptions > 0
                             && selectedOptionsCount > maxOptions)
                         {
-                            PageMessageService.addMessage('danger', 'Maximum of '+maxOptions+' options can to be selected from '+optiongroup.groupName);
+                            PageMessageService.addMessage('error', 'Maximum of '+maxOptions+' options can to be selected from '+optiongroup.groupName);
                             res = false;
                         }
                     }
