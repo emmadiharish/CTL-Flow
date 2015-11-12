@@ -48,7 +48,7 @@
 				initializeProductAttributes(response);
 				// logTransaction(response, categoryRequest);
 				BaseService.setPAConfigLoadComplete();
-				return getProductAttributesConfig();
+				return cachedProductAttributes;
 			});
 		}
 

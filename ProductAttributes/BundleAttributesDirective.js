@@ -47,6 +47,7 @@
                 || attrCtrl.SeatCountForBundle != null){
                 attrCtrl.productAttributeValues['Total_Seats__c'] = attrCtrl.SeatCountForBundle;
             }
+            
             retrieveproductattributeGroupData();
         });
         
