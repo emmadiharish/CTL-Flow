@@ -43,7 +43,7 @@
         });
 
         $scope.$watch('optionGroupService.seatTypeCount', function(newVal, oldVal){
-            attrCtrl.SeatCountForBundle = attrCtrl.optionGroupService.seatTypeCount;
+            attrCtrl.SeatCountForBundle = newVal;
             //if($scope.productAttributeValues.hasOwnProperty('Total_Seats__c') && $scope.SeatCountForBundle > 0){
             if(attrCtrl.SeatCountForBundle != 'undefined' 
                 || attrCtrl.SeatCountForBundle != null){
