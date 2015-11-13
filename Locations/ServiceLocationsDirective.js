@@ -4,7 +4,7 @@
 ;(function() {
 	'use strict';
 
-	function LocationController(BaseConfigService, LocationDataService) {
+	function LocationController(SystemConstants, BaseConfigService, LocationDataService) {
         // all variable intializations.
         var locCtrl = this;
         function init(){
@@ -14,6 +14,7 @@
                 locCtrl.displaylocations = LocationDataService.hasServicelocations;
             })
             
+            locCtrl.baseUrl = SystemConstants.baseUrl;
             locCtrl.newserviceLocationURL = BaseConfigService.newLocationURL;
         }
         
@@ -24,7 +25,8 @@
         }
     };
     
-    LocationController.$inject = ['BaseConfigService', 
+    LocationController.$inject = ['SystemConstants',
+    								'BaseConfigService', 
     							   'LocationDataService'];
 
 	angular.module('APTPS_ngCPQ').directive('serviceLocations', ServiceLocations);

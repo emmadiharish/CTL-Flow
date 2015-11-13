@@ -1,4 +1,4 @@
-(function() {
+;(function() {
 	angular.module('APTPS_ngCPQ').controller('paginationControlsCtrl', PaginationControlsCtrl);
 	
 	PaginationControlsCtrl.$inject = [
