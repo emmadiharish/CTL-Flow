@@ -12,7 +12,7 @@
 		'ui.bootstrap', 
 		'dialogs', 
 		'ui.select',
-		'angularUtils.directives.dirPagination',]
+		'angularUtils.directives.dirPagination']
 		);
 }).call(this);
 
