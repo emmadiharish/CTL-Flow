@@ -11,7 +11,8 @@
 		['ngProgress', 
 		'ui.bootstrap', 
 		'dialogs', 
-		'ui.select']
+		'ui.select',
+		'angularUtils.directives.dirPagination',]
 		);
 }).call(this);
 
