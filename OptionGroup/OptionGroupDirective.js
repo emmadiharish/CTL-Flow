@@ -63,7 +63,7 @@
                 OptionGroupDataService.getOptionGroup(productId).then(function(result) {
                     // select Option component only if group is not null.
                     if(!_.isNull(optionGroup))
-                        selectOptionProduct(prodcomponent, optionGroup);
+                        selectOptionProduct(prodcomponent, optionGroup, forceSelect);
                     
                     OptionGroupDataService.setrerenderHierarchy(true);
                     grpCtrl.currentproductoptiongroups = OptionGroupDataService.getcurrentproductoptiongroups();
@@ -72,22 +72,13 @@
 
                     // render the attributes for the sub-bundle
                     if(_.isNull(bundleproductId))
-                        grpCtrl.renderoptionproductattributes(prodcomponent, optionGroup);
+                        grpCtrl.renderoptionproductattributes(prodcomponent, optionGroup, true);
                 })
             }
         }
 
-        /*grpCtrl.selectProductrenderoptionproductattributes = function(prodcomponent, groupindex){
-            
-            // select the product and add to tree.
-            selectOptionProduct(prodcomponent, groupindex);
-            
-            // set selected option product which has watch with option Attribute Controller.
-            OptionGroupDataService.setSelectedoptionproduct(prodcomponent);
-        }*/
-
-        grpCtrl.renderoptionproductattributes = function(prodcomponent, optionGroup){
-            selectOptionProduct(prodcomponent, optionGroup);
+        grpCtrl.renderoptionproductattributes = function(prodcomponent, optionGroup, forceSelect){
+            selectOptionProduct(prodcomponent, optionGroup, forceSelect);
 
             // do not render attributes when option product is unchecked or product does not have attributes.
             if(isProdSelected(prodcomponent)
@@ -143,7 +134,7 @@
             }
             else// select/unselect for checkbox based on prior value.
             {
-                productComponent.isselected = !productComponent.isselected;
+                productComponent.isselected = forceSelect ? forceSelect : !productComponent.isselected;;
             }    
         };
 
