@@ -3,14 +3,14 @@
 
     angular.module('APTPS_ngCPQ').directive('pageErrorMessages', PageErrorMessages);
 
-    PageErrorMessages.$inject = ['systemConstants'];
+    PageErrorMessages.$inject = ['SystemConstants'];
 
-    function PageErrorMessages(systemConstants) {
+    function PageErrorMessages(SystemConstants) {
         return {
             controller: PageErrorMessagesCtrl,
             controllerAs: 'pageErrors',
             bindToController: true,
-            templateUrl: systemConstants.baseUrl + '/Templates/page-error-messages.html'
+            templateUrl: SystemConstants.baseUrl + '/Templates/page-error-messages.html'
         };
 
     }
