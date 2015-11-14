@@ -115,14 +115,14 @@
             }
         }
 
-        function selectOptionProduct(prodcomponent, optionGroup){
-            toggleOption(prodcomponent, optionGroup);
+        function selectOptionProduct(prodcomponent, optionGroup, forceSelect){
+            toggleOption(prodcomponent, optionGroup, forceSelect);
             
             // rerender the tree so Add/remove of line item will be applied to tree.
             OptionGroupDataService.setrerenderHierarchy(true);
         }
 
-        function toggleOption(productComponent, optionGroup) {
+        function toggleOption(productComponent, optionGroup, forceSelect) {
             var thisGroup = optionGroup;
             var toggledComponent = productComponent;
             if (thisGroup.ischeckbox == false) {
