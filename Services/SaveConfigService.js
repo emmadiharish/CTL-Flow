@@ -7,14 +7,14 @@
                                   'BaseService', 
                                   'BaseConfigService', 
                                   'RemoteService', 
-                                  'PageMessageService', 
+                                  'PageErrorDataService', 
                                   'LocationDataService', 
                                   'PricingMatrixDataService', 
                                   'OptionGroupDataService', 
                                   'ProductAttributeValueDataService', 
                                   'ConstraintRuleDataService'];
     
-    function SaveConfigService($q, $log, BaseService, BaseConfigService, RemoteService, PageMessageService, LocationDataService, PricingMatrixDataService, OptionGroupDataService, ProductAttributeValueDataService, ConstraintRuleDataService) {
+    function SaveConfigService($q, $log, BaseService, BaseConfigService, RemoteService, PageErrorDataService, LocationDataService, PricingMatrixDataService, OptionGroupDataService, ProductAttributeValueDataService, ConstraintRuleDataService) {
         var service = this;
 
         var productIdtoComponentMap = {};
@@ -149,7 +149,7 @@
                         })
                     }// end of saveresult.isSuccess check.
                     else{
-                        PageMessageService.addMessage('error', 'Save call is Failing: '+saveresult.errorMessage);
+                        PageErrorDataService.add('Save call is Failing: '+saveresult.errorMessage);
                         BaseService.completeSaveProgress();// end progress bar.
                         // $scope.safeApply();
                         deferred.reject('Save Failed.');
@@ -211,7 +211,7 @@
                 var recommendedProductIds = [];
 
                 _.each(constraintActionDoList, function(ActionDo){
-                    // get all error messages and add to PageMessageService.
+                    // get all error messages and add to PageErrorDataService.
                     var TriggeringProductIds = ActionDo.TriggeringProductIds;
                     var Message = ActionDo.Message;
                     // possible message types : error, warning, info.
@@ -248,7 +248,7 @@
                                 break;
                             case 'Show Message':
                                 if(ActionType == 'Validation'){
-                                    PageMessageService.addMessage(MessageType, Message);
+                                    PageErrorDataService.add(Message);
                                 }
                                 else if(ActionType == 'Recommendation'){
                                     recommendedProductIds.push(SuggestedProductIds);
@@ -310,7 +310,7 @@
                                         if(ActionType == 'Inclusion'
                                             || ActionType == 'Exclusion')
                                         {
-                                            PageMessageService.addMessage(MessageType, Message);
+                                            PageErrorDataService.add(Message);
                                             numRulesApplied++;
                                         }
                                         break;
@@ -322,7 +322,7 @@
                                             // apply rule only if option is selected.
                                             if(isProdSelected(productcomponent, optiongroup))
                                             {
-                                                // PageMessageService.addMessage(MessageType, Message);
+                                                // PageErrorDataService.add(Message);
                                                 numRulesApplied++;
                                                 
                                                 // if disabled product is selected as radio then remove it.
@@ -361,7 +361,7 @@
 
         function runClientValidations(){
             $log.info('running Client Validations.');
-            PageMessageService.clearAll();
+            PageErrorDataService.clear();
             // Validation 1 : Service location has to be selected.
             var res = true;
             var servicelocation = LocationDataService.getselectedlpa();
@@ -370,7 +370,7 @@
                 && hasLocations)
             {
                 // alert('Please select service location to proceed.');
-                PageMessageService.addMessage('error', 'Please select location to Proceed.');
+                PageErrorDataService.add('Please select location to Proceed.');
                 res = false;
             }
             
@@ -413,13 +413,13 @@
                         if(minOptions > 0
                             && selectedOptionsCount < minOptions)
                         {
-                            PageMessageService.addMessage('error', 'Minimum of '+minOptions+' options have to be selected in '+optiongroup.groupName);
+                            PageErrorDataService.add('Minimum of '+minOptions+' options have to be selected in '+optiongroup.groupName);
                             res = false;
                         }
                         if(maxOptions > 0
                             && selectedOptionsCount > maxOptions)
                         {
-                            PageMessageService.addMessage('error', 'Maximum of '+maxOptions+' options can to be selected from '+optiongroup.groupName);
+                            PageErrorDataService.add('Maximum of '+maxOptions+' options can to be selected from '+optiongroup.groupName);
                             res = false;
                         }
                     }

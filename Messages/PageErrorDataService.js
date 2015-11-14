@@ -8,11 +8,11 @@
     angular.module('APTPS_ngCPQ')
         .service('PageErrorDataService', PageErrorDataService); 
 
-    PageErrorDataService.$inject = ['systemConstants', 'aptBase.i18nService'];
+    PageErrorDataService.$inject = ['SystemConstants'];
 
-    function PageErrorDataService(systemConstants, i18nService) {
+    function PageErrorDataService(SystemConstants) {
         var service = this;
-        var nsPrefix = systemConstants.nsPrefix;
+        var nsPrefix = SystemConstants.nsPrefix;
         
         service.errorMessages = [];
 
@@ -22,11 +22,9 @@
          * Check for errors in system constants, etc
          */
         function checkSystemErrors() {
-            if (!systemConstants.baseFileUrl) {
-                service.errorMessages.push(i18nService.CustomLabel.NoCarouselDefaultIconId);
-                
+            if (!SystemConstants.baseFileUrl) {
+                service.errorMessages.push('No Carousel Default IconId');
             }
-
         }
 
         /**
