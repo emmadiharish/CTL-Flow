@@ -11,13 +11,15 @@
         function init(){
              
             // Initialize  Variables
-            miniCtrl.reverse = false;                
+            // miniCtrl.reverse = false;                
+            // miniCtrl.itemsPerPage = 5;
+            miniCtrl.cart = [];
+            // miniCtrl.pagedItems = [];
+            // miniCtrl.currentPage = 0;
             miniCtrl.itemsPerPage = 5;
-            miniCtrl.pagedItems = [];
-            miniCtrl.currentPage = 0;
             
             miniCtrl.baseUrl = SystemConstants.baseUrl;
-            miniCtrl.lineCount = 0;
+            // miniCtrl.lineCount = 0;
             
             // Group by pages
             miniCtrl.groupToPages();
@@ -25,10 +27,10 @@
 
         // Calculate Total Number of Pages based on Records Queried 
         miniCtrl.groupToPages = function () {
-            miniCtrl.currentPage = 0;
+            // miniCtrl.currentPage = 0;
             MiniCartDataService.getMiniCartLines().then(function(result) {
-                miniCtrl.items = result;        
-                miniCtrl.lineCount = miniCtrl.items.length;
+                miniCtrl.cart = result;        
+                /*miniCtrl.lineCount = miniCtrl.items.length;
                 miniCtrl.pagedItems = [];
                 for (var i = 0; i < miniCtrl.items.length; i++) {
                     if (i % miniCtrl.itemsPerPage === 0) {
@@ -36,11 +38,11 @@
                     } else {
                         miniCtrl.pagedItems[Math.floor(i / miniCtrl.itemsPerPage)].push(miniCtrl.items[i]);
                     }
-                }
+                }*/
             })
         };
             
-        miniCtrl.firstPage = function () {
+        /*miniCtrl.firstPage = function () {
             miniCtrl.currentPage = 0;
         };
         
@@ -62,7 +64,7 @@
         
         miniCtrl.setPage = function () {
             miniCtrl.currentPage = this.n;
-        };
+        };*/
         
         miniCtrl.invokeDoConfigure = function(lineItemId){
             MiniCartDataService.configureLineItem(lineItemId).then(function(result){
@@ -86,14 +88,14 @@
             })
         };
         
-        miniCtrl.launch = function(which, productName, lineNumber){
+        miniCtrl.launch = function(which, lineItem){
             var dlg = null;
             switch(which){
                 // Delete Line Item Confirm Dialog
                 case 'confirmRemoveLine':
-                    dlg = $dialogs.confirm('Please Confirm','Are you sure you want to Delete "'+productName+ '" from cart ?');
+                    dlg = $dialogs.confirm('Please Confirm','Are you sure you want to Delete "'+lineItem.Apttus_Config2__ProductId__r.Name+ '" from cart ?');
                     dlg.result.then(function(btn){
-                        miniCtrl.deleteLineItemFromCart(lineNumber);
+                        miniCtrl.deleteLineItemFromCart(lineItem.Apttus_Config2__LineNumber__c);
                     },function(btn){
                         
                 });
@@ -107,6 +109,14 @@
                 && !_.isEmpty(pgReference))
                 res = _.unescape(pgReference);
             return res;
+        };
+
+        miniCtrl.gotoCart = function() {
+            
+        };
+
+        miniCtrl.finalizeCart = function() {
+            
         };
 
         init();
@@ -129,7 +139,7 @@
 			// terminal: true,
 			scope: {}, // {} = isolate, true = child, false/undefined = no change
 			controller: MiniCartController,
-			controllerAs: 'Ctrl',
+			controllerAs: 'miniCart',
 			// require: 'ngModel', // Array = multiple requires, ? = optional, ^ = check parent elements
 			restrict: 'AE', // E = Element, A = Attribute, C = Class, M = Comment
 			//template: '<div>pageHeader</div>',
