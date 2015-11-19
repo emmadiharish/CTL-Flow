@@ -1,5 +1,5 @@
 /**
- * Directive: fixedHeader
+ * Directive: setClassWhenAtTop
  * 
  */
 ;(function() {
@@ -11,10 +11,6 @@
     SetClassWhenAtTop.$inject = ['$window'];
 
     function SetClassWhenAtTop($window){
-
-    }
-
-    directive('setClassWhenAtTop', function ($window) {
         var directive;
         var $win = angular.element($window); // wrap window object as jQuery object
 
@@ -34,5 +30,5 @@
             }
         };
         return directive;
-    });
+    };
 }).call(this);
