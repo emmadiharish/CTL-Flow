@@ -5,11 +5,11 @@
 ;(function() {
 	'use strict';
 
-	angular.module('aptCPQUI').directive('fixedHeader', FixedHeader);
+	angular.module('APTPS_ngCPQ').directive('fixedHeader', FixedHeader);
 
-	FixedHeader.$inject = ['systemConstants'];
+	FixedHeader.$inject = ['SystemConstants'];
 
-	function FixedHeader(systemConstants) {
+	function FixedHeader(SystemConstants) {
 		var directive;
 		directive = {
 				link: function(scope, elem, attributes) {
