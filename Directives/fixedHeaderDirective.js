@@ -15,7 +15,7 @@
 				link: function(scope, elem, attributes) {
 					var body, globalHeader, header, processTrail, scrollHandler;
 					header = elem[0];
-					globalHeader = document.querySelector('.header-global');
+					globalHeader = document.querySelector('.navbar-cap');
 					processTrail = document.querySelector('.process-trail');
 					if (attributes.parent) {
 						body = document.querySelector(attributes.parent);
