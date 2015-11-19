@@ -63,7 +63,7 @@
                 OptionGroupDataService.getOptionGroup(productId).then(function(result) {
                     // select Option component only if group is not null.
                     if(!_.isNull(optionGroup))
-                        selectOptionProduct(prodcomponent, optionGroup, forceSelect);
+                        selectOptionProduct(prodcomponent, optionGroup, true);
                     
                     OptionGroupDataService.setrerenderHierarchy(true);
                     grpCtrl.currentproductoptiongroups = OptionGroupDataService.getcurrentproductoptiongroups();
