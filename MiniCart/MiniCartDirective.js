@@ -4,6 +4,33 @@
 ;(function() {
 	'use strict';
 
+    function miniCartLink(scope, elem, attrs, ctrl) {
+            var dropdown = elem[0].querySelector('.mini-cart__display');
+            var clickOutside = document.querySelector('html');
+            clickOutside.addEventListener('click', function() {
+                return elem.removeClass('is--open');
+            });
+            elem[0].addEventListener('click', function(e) {
+                return e.stopPropagation();
+            });
+
+            /*scope.$watch(function () { return ctrl.totals; },
+                    function(newVal, oldVal) {
+                if(newVal) {
+                    ctrl.syncCartTotal();
+                }
+            }, true
+            );*/
+
+            return dropdown.addEventListener('click', function(e) {
+                if (elem.hasClass('is--open')) {
+                    return elem.removeClass('is--open');
+                } else {
+                    return elem.addClass('is--open');
+                }
+            });
+        };
+        
 	function MiniCartController($scope, $window, $dialogs, SystemConstants, BaseService, MiniCartDataService)
     {
         var miniCtrl = this;
@@ -120,34 +147,6 @@
         };
 
         init();
-
-        function miniCartLink(scope, elem, attrs, ctrl) {
-            var dropdown = elem[0].querySelector('.mini-cart__display');
-            var clickOutside = document.querySelector('html');
-            clickOutside.addEventListener('click', function() {
-                return elem.removeClass('is--open');
-            });
-            elem[0].addEventListener('click', function(e) {
-                return e.stopPropagation();
-            });
-
-            /*scope.$watch(function () { return ctrl.totals; },
-                    function(newVal, oldVal) {
-                if(newVal) {
-                    ctrl.syncCartTotal();
-                }
-            }, true
-            );*/
-
-            return dropdown.addEventListener('click', function(e) {
-                if (elem.hasClass('is--open')) {
-                    return elem.removeClass('is--open');
-                } else {
-                    return elem.addClass('is--open');
-                }
-            });
-        };
-
     };
     MiniCartController.$inject = ['$scope', 
     								'$window', 
