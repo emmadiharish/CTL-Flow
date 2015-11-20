@@ -7,7 +7,6 @@
     	var service = this;
         
         var pageloadComplete = false;
-        // var ProgressBartinprogress = false;
         var isMiniCartLoadComplete = false;
     	var isLocationLoadComplete = false;
         var isPricingMatrixLoadComplete = false;
@@ -22,8 +21,7 @@
     	service.completeprogress = completeprogress;
         service.completeSaveProgress = completeSaveProgress;
         service.ProgressBartinprogress = false;
-        service.getProgressBartinprogress = getProgressBartinprogress;
-
+        
         service.setMiniCartLoadComplete = function(){
             isMiniCartLoadComplete = true;
             completeprogress();

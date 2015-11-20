@@ -12,17 +12,12 @@
 		var validateCtrl = this;
 		
 		function init(){
-			$scope.baseService = BaseService;
-			// validateCtrl.ProgressBartinprogress = false;
+			
 		}
 		
 		validateCtrl.ProgressBartinprogress =function(){
 			return BaseService.ProgressBartinprogress;
 		}
-
-		/*$scope.$watch('baseService.getProgressBartinprogress()', function(newVal, oldVal){
-            validateCtrl.ProgressBartinprogress = newVal;
-        });*/
 
 		/*@Validate
             Save Config and run constraint rules.

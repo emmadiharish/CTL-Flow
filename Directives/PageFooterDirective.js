@@ -23,17 +23,13 @@
         var pgFooterCtrl = this;
         
         function init(){
-            $scope.baseService = BaseService;
-            
             pgFooterCtrl.constants = SystemConstants;
             pgFooterCtrl.baseUrl = SystemConstants.baseUrl;
-            pgFooterCtrl.ProgressBartinprogress = false;
-            //pgFooterCtrl.ProgressBartinprogress = BaseService.getProgressBartinprogress();
         }
 
-        $scope.$watch('baseService.getProgressBartinprogress()', function(newVal, oldVal){
-            pgFooterCtrl.ProgressBartinprogress = newVal;
-        });
+        pgFooterCtrl.ProgressBartinprogress =function(){
+            return BaseService.ProgressBartinprogress;
+        }
 
         $scope.safeApply = function(fn) {
             var phase = this.$root.$$phase;
