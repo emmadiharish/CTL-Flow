@@ -51,8 +51,13 @@
 
             }
             if (angular.isArray(pageErrors)) {
-                Array.prototype.push.apply(service.errorMessages, pageErrors);
-
+                // Array.prototype.push.apply(service.errorMessages, pageErrors);
+                _.each(pageErrors, function(pageError){
+                    if (angular.isObject(pageError)
+                        && pageError.hasOwnProperty('message')) {
+                        service.errorMessages.push(pageError.message);
+                    }
+                })
             } else if (angular.isObject(pageErrors)) {
                 if (pageErrors.hasOwnProperty('message')) {
                     service.errorMessages.push(pageErrors.message);
