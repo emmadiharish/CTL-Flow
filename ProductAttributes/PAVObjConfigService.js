@@ -29,9 +29,17 @@
 			BaseService.startprogress();// start progress bar.
 			return requestPromise.then(function(response){
 				initializefieldNametoDFRMap(response);
+				
+				// add if any erors.
+                // PageErrorDataService.add(response.messageWrapList);
+
 				BaseService.setPAVObjConfigLoadComplete();
 				return RemoteService.getOptiontoOptionAttributes().then(function(optiontoOptionattrs){
 					initializeportOptions(optiontoOptionattrs);
+					
+					// add if any erors.
+                	// PageErrorDataService.add(optiontoOptionattrs.messageWrapList);
+
 					BaseService.setOptiontoOptionAttributeLoadComplete();
 					return service.fieldNametoDFRMap;
 			    });

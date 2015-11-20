@@ -23,6 +23,9 @@
 				initializeProductAttributeValues(response);
 				// logTransaction(response, categoryRequest);
 				BaseService.setPAVLoadComplete();
+
+				// add if any erors.
+                // PageErrorDataService.add(response.messageWrapList);
 				return componentIdtoOptionPAVMap;
 			});
 		}

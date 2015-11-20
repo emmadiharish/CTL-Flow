@@ -149,12 +149,14 @@
                         })
                     }// end of saveresult.isSuccess check.
                     else{
-                        PageErrorDataService.add('Save call is Failing: '+saveresult.errorMessage);
+                        // PageErrorDataService.add('Save call is Failing: '+saveresult.errorMessage);
                         BaseService.completeSaveProgress();// end progress bar.
                         // $scope.safeApply();
                         deferred.reject('Save Failed.');
                         return deferred.promise;
                     }
+                    // add if any erors.
+                    PageErrorDataService.add(saveresult.messageWrapList);
                 })// end of saveQuoteConfig remote call.
             }// end of validateonsubmit.
             else{
@@ -206,6 +208,10 @@
                 var constraintActionDoList = result.appliedActionDOList;
                 ConstraintRuleDataService.updateRuleActions(constraintActionDoList);
                 var numRulesApplied = 0; //constraintActionDoList.length;
+                
+                // add if any erors.
+                PageErrorDataService.add(result.messageWrapList);
+
                 /*var allOptionGroups = OptionGroupDataService.getallOptionGroups();
                 var productIdtoActionDOMap = {};
                 var recommendedProductIds = [];

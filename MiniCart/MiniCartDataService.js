@@ -29,6 +29,10 @@
 				BaseService.setMiniCartLoadComplete();
 				miniCartLines = response.lineItems;
 				miniCartLinesCount = response.length;
+				
+				// add if any erors.
+                // PageErrorDataService.add(response.messageWrapList);
+
 				return miniCartLines;
 			});
 		}

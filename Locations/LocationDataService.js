@@ -64,9 +64,16 @@
                                                         servicelocationIdSet:locationIdSet
                                                         , bundleprodId: BaseConfigService.lineItem.bundleProdId
                                                     };
+                    // add if any erors.
+                    // PageErrorDataService.add(response.messageWrapList);
+
                     requestPromise = RemoteService.getLocationAvailabilities(locationAvailabiltyRequest);
                         return requestPromise.then(function(laresponse){
                             initializelocationAvailabilities(laresponse);
+                            
+                            // add if any erors.
+                            // PageErrorDataService.add(laresponse.messageWrapList);
+
                             BaseService.setLocationLoadComplete();
                                     
                         _.each(

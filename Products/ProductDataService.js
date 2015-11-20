@@ -33,6 +33,8 @@
 				_.each(ProductIds, function(prodId){
 					res[prodId] = productIdtoProductMap[prodId];
 				})
+				// add if any erors.
+                // PageErrorDataService.add(response.messageWrapList);
 				return res;
 			});
 		}

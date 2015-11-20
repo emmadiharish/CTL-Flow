@@ -47,6 +47,9 @@
 			return requestPromise.then(function(response){
 				initializeProductAttributes(response);
 				// logTransaction(response, categoryRequest);
+                // add if any erors.
+                // PageErrorDataService.add(response.messageWrapList);
+                
 				BaseService.setPAConfigLoadComplete();
 				return cachedProductAttributes;
 			});

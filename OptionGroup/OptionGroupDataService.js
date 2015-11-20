@@ -70,6 +70,10 @@
                 var cachedOptionGroups = OptionGroupCache.getOptionGroups();
                 var alloptionProductIds_hasOptions = OptionGroupCache.getProductIdsofBundles();
                 var prodIds_filtered = _.difference(alloptionProductIds_hasOptions, _.keys(cachedOptionGroups)); 
+                
+                // add if any erors.
+                // PageErrorDataService.add(response.messageWrapList);
+                
                 if (prodIds_filtered.length > 0
                     && currentSubBundleLevel < maxSubBundleLevel) {
                     getOptionGroups(prodIds_filtered, deferred);

@@ -93,9 +93,14 @@
                 SaveConfigService.saveinformation().then(function(response){
                     if(response == true)
                     {
-                        var cartId = BaseConfigService.cartId, configRequestId = BaseConfigService.configRequestId, flowName = BaseConfigService.flowName;
-                        var requestPromise = RemoteService.addMoreProducts(cartId, configRequestId, flowName);
+                        var requestparam = {cartHeader:BaseConfigService.cartHeader, 
+                                            paramsMap:{}, 
+                                            actionName:'Add More Products'};
+                        var requestPromise = RemoteService.runPageAction(requestparam);
                         return requestPromise.then(function(response){
+                            // add if any erors.
+                            PageErrorDataService.add(response.messageWrapList);
+
                             parsenRedirect(response);
                         });
                     }
@@ -109,9 +114,14 @@
                 SaveConfigService.saveinformation().then(function(response){
                     if(response == true)
                     {
-                        var cartId = BaseConfigService.cartId, configRequestId = BaseConfigService.configRequestId, flowName = BaseConfigService.flowName;
-                        var requestPromise = RemoteService.goToPricing(cartId, configRequestId, flowName);
+                        var requestparam = {cartHeader:BaseConfigService.cartHeader, 
+                                            paramsMap:{}, 
+                                            actionName:'Go To Pricing'};
+                        var requestPromise = RemoteService.runPageAction(requestparam);
                         return requestPromise.then(function(response){
+                            // add if any erors.
+                            PageErrorDataService.add(response.messageWrapList);
+
                             parsenRedirect(response);
                         });
                     }
@@ -120,17 +130,28 @@
         }
 
         function Abandon(){
-            var cartId = BaseConfigService.cartId, quoteId = BaseConfigService.proposal.Id;
-            var requestPromise = RemoteService.doAbandonCart(cartId, quoteId);
+            var requestparam = {cartHeader:BaseConfigService.cartHeader, 
+                                            paramsMap:{}, 
+                                            actionName:'Abandon'};
+            var requestPromise = RemoteService.runPageAction(requestparam);
             return requestPromise.then(function(response){
+                // add if any erors.
+                PageErrorDataService.add(response.messageWrapList);
+
                 parsenRedirect(response);
             });
         }
 
         function removeItemFromCart(){
-            var cartId = BaseConfigService.cartId, configRequestId = BaseConfigService.configRequestId, flowName = BaseConfigService.flowName, primaryLineNumber = BaseConfigService.lineItem.lineNumber, bundleProdId = BaseConfigService.lineItem.bundleProdId;
-            var requestPromise = RemoteService.removeBundleLineItem(cartId, configRequestId, flowName, primaryLineNumber, bundleProdId);
+            var primaryLineNumber = BaseConfigService.lineItem.lineNumber, bundleProdId = BaseConfigService.lineItem.bundleProdId;
+            var requestparam = {cartHeader:BaseConfigService.cartHeader, 
+                                            paramsMap:{primaryLineNumber: primaryLineNumber, bundleProdId: bundleProdId}, 
+                                            actionName:'Remove Current Bundle'};
+            var requestPromise = RemoteService.runPageAction(requestparam);
             return requestPromise.then(function(response){
+                // add if any erors.
+                PageErrorDataService.add(response.messageWrapList);
+                    
                 parsenRedirect(response);
             });
         }

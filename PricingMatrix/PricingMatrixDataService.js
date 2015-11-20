@@ -26,6 +26,10 @@
 			BaseService.startprogress();// start progress bar.
 			return requestPromise.then(function(response){
 				initializePricingMatrix(response);
+				
+				// add if any erors.
+                // PageErrorDataService.add(response.messageWrapList);
+
 				BaseService.setPricingMatrixLoadComplete();
 				return pricingMatrixSearchResult;
 			});
