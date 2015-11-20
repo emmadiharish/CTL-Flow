@@ -130,10 +130,6 @@
             }
         }
 
-        function getProgressBartinprogress(){
-            return service.ProgressBartinprogress;
-        }
-
         init();
     }
 })();
