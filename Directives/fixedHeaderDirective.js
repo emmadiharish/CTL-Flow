@@ -22,7 +22,7 @@
 					} else {
 						//body = header.parentNode;
 					}
-					body = header.parentNode;
+					body = document.querySelector(attributes.parent);
 					scrollHandler = function(ev) {
 						var bodyRect, globalHeaderRect, headerRect, processTrailRect;
 						bodyRect = body.getBoundingClientRect();
