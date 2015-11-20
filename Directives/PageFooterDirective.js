@@ -15,9 +15,10 @@
                                'BaseService', 
                                'BaseConfigService',
                                'RemoteService',
-                               'SaveConfigService'];
+                               'SaveConfigService',
+                               'PageErrorDataService'];
 	
-	function PageFooterController($scope, $q, $log, $window, $timeout, $dialogs, SystemConstants, BaseService, BaseConfigService, RemoteService, SaveConfigService){
+	function PageFooterController($scope, $q, $log, $window, $timeout, $dialogs, SystemConstants, BaseService, BaseConfigService, RemoteService, SaveConfigService, PageErrorDataService){
 		// all variable intializations.
         var pgFooterCtrl = this;
         
