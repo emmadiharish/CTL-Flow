@@ -7,7 +7,7 @@
     	var service = this;
         
         var pageloadComplete = false;
-        var ProgressBartinprogress = false;
+        // var ProgressBartinprogress = false;
         var isMiniCartLoadComplete = false;
     	var isLocationLoadComplete = false;
         var isPricingMatrixLoadComplete = false;
@@ -21,6 +21,7 @@
     	service.startprogress = startprogress;
     	service.completeprogress = completeprogress;
         service.completeSaveProgress = completeSaveProgress;
+        service.ProgressBartinprogress = false;
         service.getProgressBartinprogress = getProgressBartinprogress;
 
         service.setMiniCartLoadComplete = function(){
@@ -95,10 +96,10 @@
         
         // start the page level progress bar.
         function startprogress(){
-            if(ProgressBartinprogress == false)
+            if(service.ProgressBartinprogress == false)
             {
                 $log.log('inside startprogress');
-                ProgressBartinprogress = true;
+                service.ProgressBartinprogress = true;
                 ngProgress.reset();// reset the progress bar if not completed by previous methids.
                 ngProgress.start(); // start progress.
             }
@@ -110,7 +111,7 @@
             $log.log('inside completeprogress');
             ngProgress.complete();
             isSaveCallinProgress = false;
-            ProgressBartinprogress = false;
+            service.ProgressBartinprogress = false;
         }
         
         // complete the page level progress bar.
@@ -127,12 +128,12 @@
             {
                 $log.log('inside completeprogress');
                 ngProgress.complete();
-                ProgressBartinprogress = false;
+                service.ProgressBartinprogress = false;
             }
         }
 
         function getProgressBartinprogress(){
-            return ProgressBartinprogress;
+            return service.ProgressBartinprogress;
         }
 
         init();
