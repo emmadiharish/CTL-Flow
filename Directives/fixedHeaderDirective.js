@@ -35,7 +35,7 @@
 							});
 							angular.element(header).css({
 								'top': globalHeaderRect.height + 'px',
-								'width': (bodyRect.width - 1) + 'px'
+								'width': (bodyRect.width - 10) + 'px'
 							});
 							if (bodyRect.height + bodyRect.top - globalHeaderRect.height <= headerRect.height * 2) {
 								return angular.element(header).css({
