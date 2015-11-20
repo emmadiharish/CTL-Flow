@@ -18,10 +18,11 @@
 					globalHeader = document.querySelector('.navbar-cap');
 					processTrail = document.querySelector('.process-trail');
 					if (attributes.parent) {
-						body = document.querySelector(attributes.parent);
+						//body = document.querySelector(attributes.parent);
 					} else {
-						body = header.parentNode;
+						//body = header.parentNode;
 					}
+					body = header.parentNode;
 					scrollHandler = function(ev) {
 						var bodyRect, globalHeaderRect, headerRect, processTrailRect;
 						bodyRect = body.getBoundingClientRect();
