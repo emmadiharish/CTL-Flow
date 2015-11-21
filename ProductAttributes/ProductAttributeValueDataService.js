@@ -6,43 +6,33 @@
 	function ProductAttributeValueDataService($q, $log, BaseService, BaseConfigService, RemoteService) {
 		var service = this;
 		var bundleproductattributevalues = {};
-		var componentIdtoOptionPAVMap = {};
+		var componentIdtoOptionPAVMap;
 		
-		service.isValid = false;
 		service.getProductAttributeValues = getProductAttributeValues;
 		service.setbundleproductattributevalues = setbundleproductattributevalues;
 		service.getbundleproductattributevalues = getbundleproductattributevalues;
 		service.getoptionproductattributevalues = getoptionproductattributevalues;
 
-		function getProductAttributeValues_bulk(){
+		function getProductAttributeValues(componentId){
+			if(componentIdtoOptionPAVMap)
+			{
+				var cachedPAV = getCachedPAV(componentId);
+				return $q.when(cachedPAV);
+			}
+
 			var productAttributeValueDataRequest = {cartId: BaseConfigService.cartId
 													, lineNumber: BaseConfigService.lineItem.lineNumber};
 			var requestPromise = RemoteService.getProductAttributeValueData(productAttributeValueDataRequest);
 			BaseService.startprogress();// start progress bar.
 			return requestPromise.then(function(response){
 				initializeProductAttributeValues(response);
-				// logTransaction(response, categoryRequest);
+				
 				BaseService.setPAVLoadComplete();
 
 				// add if any erors.
                 // PageErrorDataService.add(response.messageWrapList);
-				return componentIdtoOptionPAVMap;
+				return getCachedPAV(componentId);
 			});
-		}
-
-		function getProductAttributeValues(componentId){
-			if(service.isValid == true)
-			{
-				if(!_.has(componentIdtoOptionPAVMap, componentId))
-					componentIdtoOptionPAVMap[componentId] = {};
-				return $q.when(componentIdtoOptionPAVMap[componentId]);
-			}
-
-			return getProductAttributeValues_bulk().then(function(result){
-				if(!_.has(componentIdtoOptionPAVMap, componentId))
-					componentIdtoOptionPAVMap[componentId] = {};
-				return componentIdtoOptionPAVMap[componentId];
-			})
 		}
 
 		function setbundleproductattributevalues(pav){
@@ -61,7 +51,6 @@
 		}
 
 		function initializeProductAttributeValues(response){
-			service.isValid = true;
 			_.each(response.pavWrapList, function(pavwrapper){
 				// bundle pav if Apttus_Config2__OptionId__c is null.
 				if(!_.has(pavwrapper.lineItem, 'Apttus_Config2__OptionId__c')
@@ -73,6 +62,12 @@
 					componentIdtoOptionPAVMap[pavwrapper.lineItem.Apttus_Config2__ProductOptionId__c] = pavwrapper.pav;
 				}
 			})
+		}
+
+		function getCachedPAV(componentId){
+			if(!_.has(componentIdtoOptionPAVMap, componentId))
+				componentIdtoOptionPAVMap[componentId] = {};
+			return componentIdtoOptionPAVMap[componentId];
 		}
 	}
 })();
