@@ -51,6 +51,7 @@
 		}
 
 		function initializeProductAttributeValues(response){
+			componentIdtoOptionPAVMap = {};
 			_.each(response.pavWrapList, function(pavwrapper){
 				// bundle pav if Apttus_Config2__OptionId__c is null.
 				if(!_.has(pavwrapper.lineItem, 'Apttus_Config2__OptionId__c')
