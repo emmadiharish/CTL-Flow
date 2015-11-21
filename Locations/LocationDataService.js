@@ -6,18 +6,12 @@
     function LocationDataService($q, BaseService, BaseConfigService, RemoteService) {
         var service = this;
 
+        var locations;
         var locationIdSet = [];
-        var isValid = false;
-        var locations = [];
         var locIdtolocAvlsMap = {};
         var locIdtoOptionProductsMap = {};
         var availableOptionProducts = [];
         
-        var processQueue = {
-            isRunning: [],
-            promises: []
-        };
-
         // location methods.
         service.selectedlpa = {};
         service.hasServicelocations = false;
@@ -33,74 +27,33 @@
         service.getAvailableOptionProducts = getAvailableOptionProducts;
 
         function getlocItems() {
-            if (isValid) {
-                var cachedLocations = locations;
-                // logTransaction(cachedLocations);
-                return $q.when(cachedLocations);
+            if (locations) {
+                return $q.when(locations);
             }
 
-            /*var requestPromise = RemoteService.getServiceLocations(BaseConfigService.lineItem.bundleProdId, BaseConfigService.opportunityId);
-            BaseService.startprogress();// start progress bar.
-            return requestPromise.then(function(response){
-                initializeLocations(response);
-                BaseService.setLocationLoadComplete();
-                return locations;
-            });*/
-    
             // chain the location call and location availability calls.
-            var locationRequest = {
-                                    productId: BaseConfigService.lineItem.bundleProdId
-                                    , opportunityId: BaseConfigService.opportunityId
+            var locationRequest = { productId: BaseConfigService.lineItem.bundleProdId
+                                    ,opportunityId: BaseConfigService.opportunityId
                                 }; 
             var requestPromise = RemoteService.getServiceLocations(locationRequest);
             BaseService.startprogress();// start progress bar.
-            var methodName = 'ServiceLocationsRequest';
-            var defer = $q.defer();
-            if (processQueue.isRunning.indexOf(methodName) == -1) {
-                processQueue.isRunning.push(methodName);
-                requestPromise.then(function(response){
-                    initializeLocations(response);
-                    var locationAvailabiltyRequest = {
-                                                        servicelocationIdSet:locationIdSet
-                                                        , bundleprodId: BaseConfigService.lineItem.bundleProdId
-                                                    };
-                    // add if any erors.
-                    // PageErrorDataService.add(response.messageWrapList);
-
-                    requestPromise = RemoteService.getLocationAvailabilities(locationAvailabiltyRequest);
-                        return requestPromise.then(function(laresponse){
-                            initializelocationAvailabilities(laresponse);
-                            
-                            // add if any erors.
-                            // PageErrorDataService.add(laresponse.messageWrapList);
-
-                            BaseService.setLocationLoadComplete();
-                                    
-                        _.each(
-                            _.filter(processQueue.promises, function (value, index) {
-                                return value.method == methodName;
-                            }), function (value, index) {
-                                processQueue.promises.splice(_.indexOf(processQueue, { id: value.id }));
-                                value.promise.resolve(locations);
-                            });
-                        processQueue.isRunning.splice(processQueue.isRunning.indexOf(methodName));
-                    });
-                });
-            }
-
-            processQueue.promises.push({
-                method: methodName,
-                promise: defer,
-                id: Date.now()
- 
-            });
-            return defer.promise;
+            return requestPromise.then(function(locationresponse){
+                initializeLocations(locationresponse);
+                var locationAvailabiltyRequest = { servicelocationIdSet:locationIdSet
+                                                   ,bundleprodId: BaseConfigService.lineItem.bundleProdId
+                                                };
+                requestPromise = RemoteService.getLocationAvailabilities(locationAvailabiltyRequest);
+                return requestPromise.then(function(laresponse){
+                    initializelocationAvailabilities(laresponse);
+                    BaseService.setLocationLoadComplete();
+                    return locations;
+                });                                
+            });                    
         }
 
         function initializeLocations(response) {
             locations = response.locations;
-            isValid = true;
-
+            
             if(locations.length > 0)
             {
                 service.hasServicelocations = true;
@@ -109,7 +62,6 @@
         }
 
         function initializelocationAvailabilities(response){
-            service.isValid = true;
             _.each(response.locAvailabilities, function(la){
                 var las = [];
                 var locId = la.Service_Location__c;
