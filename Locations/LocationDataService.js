@@ -12,7 +12,7 @@
         var locIdtolocAvlsMap = {};
         var locIdtoOptionProductsMap = {};
         var availableOptionProducts = [];
-
+        
         var processQueue = {
             isRunning: [],
             promises: []

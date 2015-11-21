@@ -22,6 +22,14 @@
 
         service.saveinformation = saveinformation;
         
+        /**
+         * For now, just pass the rejected promise up.
+         */
+        function onRejection(reason) {
+            PageErrorDataService.add(reason);
+            return $q.reject(reason);
+        }
+
         function saveinformation(){
             var deferred = $q.defer();
             
@@ -157,7 +165,8 @@
                     }
                     // add if any erors.
                     PageErrorDataService.add(saveresult.messageWrapList);
-                })// end of saveQuoteConfig remote call.
+                }, 
+                onRejection);// end of saveQuoteConfig remote call.
             }// end of validateonsubmit.
             else{
                 // $scope.safeApply();
@@ -361,7 +370,8 @@
                 
                 var res = {isSuccess:true, numRulesApplied:numRulesApplied};
                 deferred.resolve(res);
-            })// end of runConstraintRules remote call.
+            }, 
+            onRejection);// end of runConstraintRules remote call.
             return deferred.promise;
         }
 
