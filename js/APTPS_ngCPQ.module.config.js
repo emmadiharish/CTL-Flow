@@ -1,10 +1,10 @@
 ;(function() {
     'use strict';
 
-    ehconfigBlock.$inject = [];
+    ehconfigBlock.$inject = ['$provide'];
 
-    function ehconfigBlock(){
-        $provide.decorator("$exceptionHandler", ['$delegate', 'PageErrorDataService', function($delegate, PageErrorDataService){
+    function ehconfigBlock($provide){
+        $provide.decorator("$exceptionHandler", ['$delegate', 'BaseService', 'PageErrorDataService', function($delegate, BaseService, PageErrorDataService){
                 return function(exception, cause){
                     exception.message = 'Please contact Admin \n Message: '+exception.message;
                     $delegate(exception, cause);
