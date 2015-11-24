@@ -19,7 +19,8 @@
 
     function PageErrorMessagesCtrl(PageErrorDataService) {
         this.hideDetails = true;
-
+        this.isCollapsed = false;
+        
         this.pageErrors = function() {
             return PageErrorDataService.errorMessages;
         };
