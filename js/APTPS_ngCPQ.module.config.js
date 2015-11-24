@@ -3,7 +3,7 @@
 
     ehconfigBlock.$inject = [];
 
-    function ehconfigBlock($provide, SystemConstants, BaseService, paginationTemplateProvider){
+    function ehconfigBlock(){
         $provide.decorator("$exceptionHandler", ['$delegate', 'BaseService', 'PageErrorDataService', function($delegate, BaseService, PageErrorDataService){
                 return function(exception, cause){
                     exception.message = 'Please contact Admin \n Message: '+exception.message;
