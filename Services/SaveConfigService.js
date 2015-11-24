@@ -37,7 +37,7 @@
             {
                 // if save call is in progress then do not proceed.
                 if(BaseService.getisSaveCallinProgress() == true)
-                    return;
+                    return $q.when(true);
                 else// set the savecallprogress so next request will be denied.
                    BaseService.setisSaveCallinProgress();
                 
