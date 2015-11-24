@@ -93,6 +93,11 @@
             return isSaveCallinProgress;
         }
 
+        service.resetProgressBartinprogress = function(){
+            ngProgress.complete();
+            service.ProgressBartinprogress = false;
+        }
+
     	function init(){
             // set the color and height for status bar.
             ngProgress.color('#ffffff');
@@ -113,10 +118,9 @@
         // complete the page level progress on Save bar. Use this only for save call.
         function completeSaveProgress(){
             // complete progress only after all loads are complete.
-            $log.log('inside completeprogress');
-            ngProgress.complete();
+            $log.log('inside completeSaveProgress');
             isSaveCallinProgress = false;
-            service.ProgressBartinprogress = false;
+            service.resetProgressBartinprogress();
         }
         
         // complete the page level progress bar.
@@ -132,8 +136,7 @@
                 && isPAVLoadComplete)
             {
                 $log.log('inside completeprogress');
-                ngProgress.complete();
-                service.ProgressBartinprogress = false;
+                service.resetProgressBartinprogress();
             }
         }
 

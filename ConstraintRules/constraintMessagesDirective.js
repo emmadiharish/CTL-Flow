@@ -24,6 +24,8 @@
     function ConstraintMessagesCtrl(ConstraintRuleDataService) {
         var ctrl = this;
         
+        this.isErrorCollapsed = false;
+
         // ctrl.errorMessages = [];
         ctrl.messageField = 'Message';
 
