@@ -126,7 +126,7 @@
             }, gettimeinmillis());
         }
 
-        function Abandon(){
+        pgFooterCtrl.Abandon =function(){
             var requestparam = {cartHeader:BaseConfigService.cartHeader, 
                                             paramsMap:{}, 
                                             actionName:'Abandon'};
@@ -139,7 +139,7 @@
             });
         }
 
-        function removeItemFromCart(){
+        pgFooterCtrl.removeItemFromCart = function(){
             var primaryLineNumber = BaseConfigService.lineItem.lineNumber, bundleProdId = BaseConfigService.lineItem.bundleProdId;
             var requestparam = {cartHeader:BaseConfigService.cartHeader, 
                                             paramsMap:{primaryLineNumber: primaryLineNumber, bundleProdId: bundleProdId}, 
