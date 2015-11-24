@@ -22,7 +22,7 @@
 		/*@Validate
             Save Config and run constraint rules.
         */
-        $scope.$watch('baseService.getisSavecallRequested', function(newVal, oldVal) {
+        $scope.$watch('baseService.getisSavecallRequested()', function(newVal, oldVal) {
             if(newVal != oldVal
 				&& newVal == true)
 			{
@@ -32,6 +32,7 @@
 	                    
 	                }
 	            })
+	            
 	            // set save call requested to false.
 	            BaseService.setisSavecallRequested(false);
 	        }
