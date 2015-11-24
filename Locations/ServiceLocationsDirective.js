@@ -4,7 +4,7 @@
 ;(function() {
 	'use strict';
 
-	function LocationController(BaseConfigService, LocationDataService) {
+	function LocationController(BaseService, BaseConfigService, LocationDataService) {
         // all variable intializations.
         var locCtrl = this;
         function init(){
@@ -21,10 +21,14 @@
 
         locCtrl.setSelectedlocation = function(la){
             LocationDataService.setselectedlpa(la);
+
+            // initiate the save call on attribute change.
+            BaseService.setisSavecallRequested(true);
         }
     };
     
-    LocationController.$inject = ['BaseConfigService', 
+    LocationController.$inject = ['BaseService',
+    							   'BaseConfigService', 
     							   'LocationDataService'];
 
 	angular.module('APTPS_ngCPQ').directive('serviceLocations', ServiceLocations);

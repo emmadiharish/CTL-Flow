@@ -15,6 +15,7 @@
         var isPAConfigLoadComplete = false;
         var isOptiontoOptionAttributeLoadComplete = false;
         var isPAVLoadComplete = false;
+        var isSavecallRequested = false;
         var isSaveCallinProgress = false;
 
     	service.startprogress = startprogress;
@@ -54,6 +55,9 @@
             isPAVLoadComplete = true;
             completeprogress();
         }
+        service.setisSavecallRequested = function(){
+            isSavecallRequested = true;
+        }
         service.setisSaveCallinProgress = function(){
             isSaveCallinProgress = true;
         }
@@ -81,6 +85,9 @@
         }
         service.getPAVLoadComplete = function(){
             return isPAVLoadComplete;
+        }
+        service.getisSavecallRequested = function(){
+            return isSavecallRequested;
         }
         service.getisSaveCallinProgress = function(){
             return isSaveCallinProgress;

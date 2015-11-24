@@ -96,6 +96,9 @@
         attrCtrl.PAVPicklistChange = function(fieldName){
             // attrCtrl.productAttributeValues['isUpdatedLocal'] = true;
             renderBundleAttributes();
+
+            // initiate the save call on attribute change.
+            BaseService.setisSavecallRequested(true);
         }
 
         attrCtrl.trustAsHtml = function(value) {

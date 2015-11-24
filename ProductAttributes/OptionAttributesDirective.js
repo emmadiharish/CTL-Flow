@@ -4,7 +4,7 @@
 ;(function() {
     'use strict';
 
-    function OptionAttributesController($scope, $log, $sce, SystemConstants, LocationDataService, OptionGroupDataService, ProductAttributeConfigDataService, ProductAttributeValueDataService, PAVObjConfigService) {
+    function OptionAttributesController($scope, $log, $sce, SystemConstants, BaseService, LocationDataService, OptionGroupDataService, ProductAttributeConfigDataService, ProductAttributeValueDataService, PAVObjConfigService) {
         var attrCtrl = this;
 
         // multi-location support for E-line.
@@ -101,6 +101,9 @@
         attrCtrl.PAVPicklistChange = function(fieldName){
             renderOptionAttributes();
             ProductAttributeConfigDataService.setMultiSiteLocations(attrCtrl.productAttributeValues, LocationDataService.zLocations);
+
+            // initiate the save call on attribute change.
+            BaseService.setisSavecallRequested(true);
         }
 
         function optionLevelAttributeChange(){
@@ -150,7 +153,8 @@
     OptionAttributesController.$inject = ['$scope', 
                                             '$log',
                                             '$sce',
-                                            'SystemConstants', 
+                                            'SystemConstants',
+                                            'BaseService',
                                             'LocationDataService', 
                                             'OptionGroupDataService', 
                                             'ProductAttributeConfigDataService', 

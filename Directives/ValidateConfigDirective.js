@@ -12,7 +12,7 @@
 		var validateCtrl = this;
 		
 		function init(){
-			
+			$scope.baseService = OptionGroupDataService;
 		}
 		
 		validateCtrl.ProgressBartinprogress =function(){
@@ -22,6 +22,21 @@
 		/*@Validate
             Save Config and run constraint rules.
         */
+        $scope.$watch('baseService.getisSavecallRequested', function(newVal, oldVal) {
+            if(newVal != oldVal
+				&& newVal == true)
+			{
+	            SaveConfigService.saveinformation().then(function(response){
+	                if(response == true)
+	                {
+	                    
+	                }
+	            })
+	            // set save call requested to false.
+	            BaseService.setisSavecallRequested(false);
+	        }
+        }
+
         validateCtrl.ValidateConfig = function(){
             SaveConfigService.saveinformation().then(function(response){
                 if(response == true)
@@ -30,7 +45,7 @@
                 }
             })
         }
-
+        
         init();
 
         return validateCtrl;

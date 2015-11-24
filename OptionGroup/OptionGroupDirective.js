@@ -113,6 +113,9 @@
             {
                 pcomponent.quantity = 1;
             }
+
+            // initiate the save call on attribute change.
+            BaseService.setisSavecallRequested(true);
         }
 
         function selectOptionProduct(prodcomponent, optionGroup, forceSelect){
@@ -120,6 +123,9 @@
             
             // rerender the tree so Add/remove of line item will be applied to tree.
             OptionGroupDataService.setrerenderHierarchy(true);
+
+            // initiate the save call on attribute change.
+            BaseService.setisSavecallRequested(true);
         }
 
         function toggleOption(productComponent, optionGroup, forceSelect) {
