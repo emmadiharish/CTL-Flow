@@ -8,9 +8,9 @@
     angular.module('APTPS_ngCPQ')
         .service('PageErrorDataService', PageErrorDataService); 
 
-    PageErrorDataService.$inject = ['SystemConstants'];
+    PageErrorDataService.$inject = ['SystemConstants', 'ngProgress'];
 
-    function PageErrorDataService(SystemConstants) {
+    function PageErrorDataService(SystemConstants, ngProgress) {
         var service = this;
         var nsPrefix = SystemConstants.nsPrefix;
         
