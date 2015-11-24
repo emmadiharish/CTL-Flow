@@ -12,7 +12,7 @@
 		var validateCtrl = this;
 		
 		function init(){
-			$scope.baseService = OptionGroupDataService;
+			$scope.baseService = BaseService;
 		}
 		
 		validateCtrl.ProgressBartinprogress =function(){
