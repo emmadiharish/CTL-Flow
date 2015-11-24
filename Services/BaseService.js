@@ -56,8 +56,8 @@
             isPAVLoadComplete = true;
             completeprogress();
         }
-        service.setisSavecallRequested = function(){
-            isSavecallRequested = true;
+        service.setisSavecallRequested = function(val){
+            isSavecallRequested = val;
         }
         service.setisSaveCallinProgress = function(){
             isSaveCallinProgress = true;

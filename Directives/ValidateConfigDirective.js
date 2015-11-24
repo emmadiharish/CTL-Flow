@@ -19,8 +19,8 @@
 			return BaseService.ProgressBartinprogress;
 		}
 
-		/*@Validate
-            Save Config and run constraint rules.
+		/*
+			Save Config and run constraint rules.
         */
         $scope.$watch('baseService.getisSavecallRequested()', function(newVal, oldVal) {
             if(newVal != oldVal
@@ -38,6 +38,9 @@
 	        }
         });
 
+        /*@Validate
+            Save Config and run constraint rules.
+        */
         validateCtrl.ValidateConfig = function(){
             SaveConfigService.saveinformation().then(function(response){
                 if(response == true)
