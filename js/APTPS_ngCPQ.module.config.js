@@ -11,7 +11,7 @@
         //A single pagination-controls template is used throught the app. This may be limiting.
         paginationTemplateProvider.setPath(SystemConstants.baseUrl + '/Templates/pagination.html');
 
-        $provide.decorator("$exceptionHandler", ['$delegate', 'PageErrorDataService', function($delegate, PageErrorDataService){
+        $provide.decorator("$exceptionHandler", ['$delegate', 'BaseService', 'PageErrorDataService', function($delegate, BaseService, PageErrorDataService){
                 return function(exception, cause){
                     exception.message = 'Please contact Admin \n Message: '+exception.message;
                     $delegate(exception, cause);
