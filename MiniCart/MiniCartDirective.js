@@ -103,9 +103,8 @@
                 // add if any erors.
                 PageErrorDataService.add(result.messageWrapList);
                 
-                var configUrl = parsePagereference(result.ref);
-                if(!_.isNull(configUrl))
-                    $window.location.href = configUrl;
+                parsenRedirect(result.ref);
+                
             })
         };
 
@@ -115,9 +114,7 @@
                 // add if any erors.
                 PageErrorDataService.add(result.messageWrapList);
 
-                var retUrl = parsePagereference(result.ref);
-                if(!_.isNull(retUrl))
-                    $window.location.href = retUrl;
+                parsenRedirect(result.ref);
                 // mark minicart as dirty and reload minicart.
                 //MiniCartDataService.setMinicartasDirty();
                 //miniCtrl.groupToPages();
@@ -140,12 +137,14 @@
             }; // end switch
         }; // end launch*/
 
-        function parsePagereference(pgReference){
-            var res = null;
+        function parsenRedirect(pgReference){
             if(!_.isNull(pgReference)
                 && !_.isEmpty(pgReference))
-                res = _.unescape(pgReference);
-            return res;
+                pgReference = _.unescape(pgReference);
+            
+            if(!_.isNull(pgReference)
+                && !_.isEmpty(pgReference))
+                $window.location.href = _.unescape(pgReference);
         };
 
         miniCtrl.gotoCart = function() {

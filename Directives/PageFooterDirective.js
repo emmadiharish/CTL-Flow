@@ -98,7 +98,7 @@
                             // add if any erors.
                             PageErrorDataService.add(response.messageWrapList);
 
-                            parsenRedirect(response);
+                            parsenRedirect(response.ref);
                         });
                     }
                 })
@@ -119,7 +119,7 @@
                             // add if any erors.
                             PageErrorDataService.add(response.messageWrapList);
 
-                            parsenRedirect(response);
+                            parsenRedirect(response.ref);
                         });
                     }
                 })
@@ -135,7 +135,7 @@
                 // add if any erors.
                 PageErrorDataService.add(response.messageWrapList);
 
-                parsenRedirect(response);
+                parsenRedirect(response.ref);
             });
         }
 
@@ -149,11 +149,15 @@
                 // add if any erors.
                 PageErrorDataService.add(response.messageWrapList);
                     
-                parsenRedirect(response);
+                parsenRedirect(response.ref);
             });
         }
 
         function parsenRedirect(pgReference){
+            if(!_.isNull(pgReference)
+                && !_.isEmpty(pgReference))
+                pgReference = _.unescape(pgReference);
+
             if(!_.isNull(pgReference)
                 && !_.isEmpty(pgReference))
                 $window.location.href = _.unescape(pgReference);
