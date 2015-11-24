@@ -4,13 +4,13 @@
     ehconfigBlock.$inject = [];
 
     function ehconfigBlock(){
-        $provide.decorator("$exceptionHandler", ['$delegate', 'BaseService', 'PageErrorDataService', function($delegate, BaseService, PageErrorDataService){
+        $provide.decorator("$exceptionHandler", ['$delegate', 'PageErrorDataService', function($delegate, PageErrorDataService){
                 return function(exception, cause){
                     exception.message = 'Please contact Admin \n Message: '+exception.message;
                     $delegate(exception, cause);
                     
                     // end progress bar so atleast user can abandon on hard-error.
-                    BaseService.resetProgressBartinprogress();// end progress bar.
+                    // BaseService.resetProgressBartinprogress();// end progress bar.
                     
                     PageErrorDataService.add(exception.message);
             };
