@@ -17,7 +17,7 @@
                     $delegate(exception, cause);
                     
                     // end progress bar so atleast user can abandon on hard-error.
-                    // BaseService.resetProgressBartinprogress();// end progress bar.
+                    BaseService.resetProgressBartinprogress();// end progress bar.
                     
                     PageErrorDataService.add(exception.message);
             };
