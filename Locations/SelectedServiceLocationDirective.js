@@ -35,7 +35,7 @@
             // require: 'ngModel', // Array = multiple requires, ? = optional, ^ = check parent elements
             restrict: 'AE', // E = Element, A = Attribute, C = Class, M = Comment
             //template: '<div>pageHeader</div>',
-            templateUrl: SystemConstants.baseUrl + "/Templates/"+{{title}}+".html",
+            templateUrl: SystemConstants.baseUrl + "/Templates/"+title+".html",
             // replace: true,
             // transclude: true,
             // compile: function(tElement, tAttrs, function transclude(function(scope, cloneLinkingFn){ return function linking(scope, elm, attrs){}})),
