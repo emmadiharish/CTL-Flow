@@ -8,7 +8,8 @@
     Our module will be called 'APTPS_ngCPQ'.
  	*/
 	angular.module('APTPS_ngCPQ',
-		['ngProgress', 
+		['ngProgress',
+		'ngAnimate', 
 		'ui.bootstrap', 
 		'dialogs', 
 		'ui.select',
