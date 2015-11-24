@@ -150,7 +150,7 @@
                             if(!isProdSelected(productcomponent))
                             {    
                                 
-                                // if product is radio then include using group by setting selectedproduct.
+                                /*// if product is radio then include using group by setting selectedproduct.
                                 if(optiongroup.ischeckbox == false)
                                 {
                                    optiongroup.selectedproduct = productcomponent.productId;
@@ -158,7 +158,8 @@
                                 else{
                                     // if product is checkbox then include it.
                                     productcomponent.isselected = true;
-                                }
+                                }*/
+                                selectOptionProduct(productcomponent, optiongroup, true);
                             }
                             //break;
                         }
@@ -177,7 +178,7 @@
                             // apply rule only if option is selected.
                             if(isProdSelected(productcomponent))
                             {
-                                // if disabled product is selected as radio then remove it.
+                                /*// if disabled product is selected as radio then remove it.
                                 if(optiongroup.ischeckbox == false)
                                 {
                                    optiongroup.selectedproduct = null;
@@ -185,7 +186,8 @@
                                 else{
                                     // if disabled product is selected as checkbox then remove it.
                                     productcomponent.isselected = false;
-                                }
+                                }*/
+                                productcomponent.isselected = false;
                             }
                             productcomponent['isDisabled'] = true;
                             //break;
@@ -194,6 +196,49 @@
                 })
             })
         }
+
+        function selectOptionProduct(prodcomponent, optionGroup, forceSelect){
+            toggleOption(prodcomponent, optionGroup, forceSelect);
+            
+            // rerender the tree so Add/remove of line item will be applied to tree.
+            OptionGroupDataService.setrerenderHierarchy(true);
+        }
+
+        // should be refactored and moved to abstract model(to be built)
+        function toggleOption(productComponent, optionGroup, forceSelect) {
+            var thisGroup = optionGroup;
+            var toggledComponent = productComponent;
+            if (thisGroup.ischeckbox == false) {
+                //Always loop accross all to ensure unique selection.
+                selectNone(optionGroup);
+                
+                // select current option.
+                productComponent.isselected = true;
+            }
+            else// select/unselect for checkbox based on prior value.
+            {
+                productComponent.isselected = forceSelect ? forceSelect : !productComponent.isselected;;
+            }    
+        };
+
+        // should be refactored and moved to abstract model(to be built)
+        // unselect all options within the group. - used for radio group. 
+        // TBD: Unselected child options.
+        function selectNone(optionGroup) {
+            var hadSelection = false;
+            _.each(optionGroup.productOptionComponents, function(nextOption) {
+                if (nextOption.isselected) {
+                    nextOption.isselected = false;
+                    hadSelection = true;
+                }
+            });
+
+           /* _.each(this.childGroups, function (nextGroup) {
+                nextGroup.selectNone();
+            });*/
+
+            return hadSelection;
+        };
 
         function isProdSelected(productcomponent){
             if(productcomponent.isselected)
