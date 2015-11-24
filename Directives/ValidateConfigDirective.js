@@ -35,7 +35,7 @@
 	            // set save call requested to false.
 	            BaseService.setisSavecallRequested(false);
 	        }
-        }
+        });
 
         validateCtrl.ValidateConfig = function(){
             SaveConfigService.saveinformation().then(function(response){
