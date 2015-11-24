@@ -31,7 +31,7 @@
         });
     };
         
-	function MiniCartController($scope, $window, $dialogs, SystemConstants, BaseService, MiniCartDataService)
+	function MiniCartController($scope, $window, $dialogs, SystemConstants, BaseService, MiniCartDataService, PageErrorDataService)
     {
         var miniCtrl = this;
 
@@ -49,15 +49,18 @@
             // miniCtrl.lineCount = 0;
             
             // Group by pages
-            miniCtrl.groupToPages();
+            // miniCtrl.groupToPages();
+            MiniCartDataService.getMiniCartLines().then(function(result) {
+                miniCtrl.cart = result;
+            });
         }
 
         // Calculate Total Number of Pages based on Records Queried 
-        miniCtrl.groupToPages = function () {
+        /*miniCtrl.groupToPages = function () {
             // miniCtrl.currentPage = 0;
             MiniCartDataService.getMiniCartLines().then(function(result) {
                 miniCtrl.cart = result;        
-                /*miniCtrl.lineCount = miniCtrl.items.length;
+                miniCtrl.lineCount = miniCtrl.items.length;
                 miniCtrl.pagedItems = [];
                 for (var i = 0; i < miniCtrl.items.length; i++) {
                     if (i % miniCtrl.itemsPerPage === 0) {
@@ -65,9 +68,9 @@
                     } else {
                         miniCtrl.pagedItems[Math.floor(i / miniCtrl.itemsPerPage)].push(miniCtrl.items[i]);
                     }
-                }*/
+                }
             })
-        };
+        };*/
             
         /*miniCtrl.firstPage = function () {
             miniCtrl.currentPage = 0;
@@ -96,7 +99,11 @@
         miniCtrl.invokeDoConfigure = function(lineItemId){
             MiniCartDataService.configureLineItem(lineItemId).then(function(result){
                 // redirect the page to config URL.
-                var configUrl = parsePagereference(result);
+
+                // add if any erors.
+                PageErrorDataService.add(result.messageWrapList);
+                
+                var configUrl = parsePagereference(result.ref);
                 if(!_.isNull(configUrl))
                     $window.location.href = configUrl;
             })
@@ -105,17 +112,20 @@
         miniCtrl.deleteLineItemFromCart = function(lineNumber_tobedeleted){
             BaseService.startprogress();// start page level progress bar. 
             MiniCartDataService.deleteLineItemFromCart(lineNumber_tobedeleted).then(function(result){
-                var retUrl = parsePagereference(result);
+                // add if any erors.
+                PageErrorDataService.add(result.messageWrapList);
+
+                var retUrl = parsePagereference(result.ref);
                 if(!_.isNull(retUrl))
                     $window.location.href = retUrl;
                 // mark minicart as dirty and reload minicart.
-                MiniCartDataService.setMinicartasDirty();
-                miniCtrl.groupToPages();
+                //MiniCartDataService.setMinicartasDirty();
+                //miniCtrl.groupToPages();
                 BaseService.completeprogress();// stop page level progress bar.
             })
         };
         
-        miniCtrl.launch = function(which, lineItem){
+        /*miniCtrl.launch = function(which, lineItem){
             var dlg = null;
             switch(which){
                 // Delete Line Item Confirm Dialog
@@ -128,7 +138,7 @@
                 });
                 break;
             }; // end switch
-        }; // end launch
+        }; // end launch*/
 
         function parsePagereference(pgReference){
             var res = null;
@@ -153,7 +163,8 @@
     								'$dialogs', 
     								'SystemConstants', 
     								'BaseService', 
-    								'MiniCartDataService'];
+    								'MiniCartDataService',
+                                    'PageErrorDataService'];
 
 	angular.module('APTPS_ngCPQ').directive('miniCart', MiniCart);
 
