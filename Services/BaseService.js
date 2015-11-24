@@ -21,6 +21,7 @@
     	service.startprogress = startprogress;
     	service.completeprogress = completeprogress;
         service.completeSaveProgress = completeSaveProgress;
+        service.resetProgressBartinprogress = resetProgressBartinprogress;
         service.ProgressBartinprogress = false;
         
         service.setMiniCartLoadComplete = function(){
@@ -93,7 +94,7 @@
             return isSaveCallinProgress;
         }
 
-        service.resetProgressBartinprogress = function(){
+        function resetProgressBartinprogress(){
             ngProgress.complete();
             service.ProgressBartinprogress = false;
         }
@@ -120,7 +121,7 @@
             // complete progress only after all loads are complete.
             $log.log('inside completeSaveProgress');
             isSaveCallinProgress = false;
-            service.resetProgressBartinprogress();
+            resetProgressBartinprogress();
         }
         
         // complete the page level progress bar.
@@ -136,7 +137,7 @@
                 && isPAVLoadComplete)
             {
                 $log.log('inside completeprogress');
-                service.resetProgressBartinprogress();
+                resetProgressBartinprogress();
             }
         }
 
