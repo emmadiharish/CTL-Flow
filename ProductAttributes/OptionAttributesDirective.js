@@ -109,7 +109,7 @@
         function optionLevelAttributeChange(){
             var optionAttributes = attrCtrl.productAttributeValues;
             var portOptions = PAVObjConfigService.getPortOptions();
-            var result = ProductAttributeConfigDataService.optionAttributeChangeConstraint(optionAttributes, portOptions, $scope.AttributeGroups, $scope.productAttributeValues);
+            var result = ProductAttributeConfigDataService.optionAttributeChangeConstraint(optionAttributes, portOptions, attrCtrl.AttributeGroups, attrCtrl.productAttributeValues);
             if(!_.isEmpty(result)){
                 attrCtrl.AttributeGroups = result[0].AttributeGroups;
                 attrCtrl.productAttributeValues = result[0].productAttributeValues;
