@@ -258,14 +258,14 @@
                             if(eachattribute.fieldName == 'Bandwidth__c'){
                                 eachattribute.picklistValues = Bandwidth;
                                 if(!bandwidthIs){
-                                    productAttributeValues['Bandwidth__c'] = Bandwidth[1].label;
+                                    productAttributeValues['Bandwidth__c'] = Bandwidth[0].label;
                                 }                   
                             }
                             
                             if(eachattribute.fieldName == 'Access_Speed__c'){
                                 eachattribute.picklistValues = CircuitSpeed;
                                 if(!circuitSpeedIs){
-                                    productAttributeValues['Access_Speed__c'] = CircuitSpeed[1].value;
+                                    productAttributeValues['Access_Speed__c'] = CircuitSpeed[0].value;
                                 } 
                             }
                             
