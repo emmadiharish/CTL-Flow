@@ -300,6 +300,7 @@
                     result.push({'AttributeGroups':AttributeGroups, 'productAttributeValues':productAttributeValues});
                 }
             }
+            
             if(_.has(depattributes, 'AccessSpeed') 
                 && !_.has(depattributes, 'BillingType')){
                 
