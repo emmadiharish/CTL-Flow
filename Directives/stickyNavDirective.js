@@ -13,29 +13,30 @@
     function StickyNav($window){
         var directive;
         
-        function stickyNavLink(scope, element){
+        function stickyNavLink(scope, element, attributes){
 			var w = angular.element($window),
 			size = element[0].clientHeight,
 			top = 0;
-
+			var classname = attributes.className;
+			
 			function toggleStickyNav(){
-				if(!element.hasClass('controls-fixed') && $window.pageYOffset > top + size){
-					element.addClass('controls-fixed');
-				} else if(element.hasClass('controls-fixed') && $window.pageYOffset <= top + size){
-					element.removeClass('controls-fixed');
+				if(!element.hasClass(classname) && $window.pageYOffset > top + size){
+					element.addClass(classname);
+				} else if(element.hasClass(classname) && $window.pageYOffset <= top + size){
+					element.removeClass(classname);
 				}
 			}
 
 			scope.$watch(function(){
 				return element[0].getBoundingClientRect().top + $window.pageYOffset;
 			}, function(newValue, oldValue){
-				if(newValue !== oldValue && !element.hasClass('controls-fixed')){
+				if(newValue !== oldValue && !element.hasClass(classname)){
 					top = newValue;
 				}
 			});
 
 			w.bind('resize', function stickyNavResize(){
-				element.removeClass('controls-fixed');
+				element.removeClass(classname);
 				top = element[0].getBoundingClientRect().top + $window.pageYOffset;
 				toggleStickyNav();
 			});
