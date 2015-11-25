@@ -220,7 +220,8 @@
             _.each(portOptions, function(option){
                 if(option['Local_Access_Speed__c'] == depattributes.AccessSpeed){
                     BillingTypeSplitted.push(option['Billing_Type__c']);
-                    if(option['Billing_Type__c'] == productAttributeValues['Billing_Type__c']){
+                    if(_.has(productAttributeValues, 'Billing_Type__c')
+                        && option['Billing_Type__c'] == productAttributeValues['Billing_Type__c']){
                         billingTypeIs = true;
                     }
                 }
