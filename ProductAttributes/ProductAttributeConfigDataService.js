@@ -20,6 +20,7 @@
 		service.getDynamicGroups = getDynamicGroups;
 		service.getBundleAttributeFields = getBundleAttributeFields;
 		service.setBundleAttributeFields = setBundleAttributeFields;
+        service.getProdductIdtoattributegroupsMap = getProdductIdtoattributegroupsMap;
 
         service.setMultiSiteLocations = setMultiSiteLocations;
         service.optionAttributeChangeConstraint = optionAttributeChangeConstraint;
@@ -57,7 +58,7 @@
 
 		function getProductAttributesConfig( productId, alllocationIdSet, selectedlocationId) {
 			var productIdset = [], allgroupIds = [];
-			var currentproductoptiongroups = OptionGroupDataService.getcurrentproductoptiongroups();
+			// var currentproductoptiongroups = OptionGroupDataService.getcurrentproductoptiongroups();
             var dynamicgroupId = selectedlocationId != '' ? productId+selectedlocationId : '';
 			if (service.isValid
 				&& cachedProductAttributes != null
@@ -69,7 +70,7 @@
 				return $q.when(res);
 			}
 
-			productIdset = getAllProductsinCurrentOptiongroups(currentproductoptiongroups, 'productOptionComponents', 'productId');
+			productIdset = OptionGroupDataService.getAllProductIds(); //getAllProductsinCurrentOptiongroups(currentproductoptiongroups, 'productOptionComponents', 'productId');
             productIdset.push(productId);
             
             return getProductAttributesConfig_bulk(alllocationIdSet, productIdset, allgroupIds).then(function(result) {
@@ -170,6 +171,10 @@
             return res;
         }*/
 
+        function getProdductIdtoattributegroupsMap(){
+            return prodductIdtoattributegroupsMap;
+        }
+        
 		// util method. a: option groups, b: field name to access product components, c: field name to access product Id within product component.
         function getAllProductsinCurrentOptiongroups(a, b, c){
             // return a list of bundle product Id's. based on flag provided.

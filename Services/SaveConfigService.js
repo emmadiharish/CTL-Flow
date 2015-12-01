@@ -11,10 +11,12 @@
                                   'LocationDataService', 
                                   'PricingMatrixDataService', 
                                   'OptionGroupDataService', 
-                                  'ProductAttributeValueDataService', 
+                                  'ProductAttributeValueDataService',
+                                  'ProductAttributeConfigDataService',
+                                  'PAVObjConfigService',
                                   'ConstraintRuleDataService'];
     
-    function SaveConfigService($q, $log, BaseService, BaseConfigService, RemoteService, PageErrorDataService, LocationDataService, PricingMatrixDataService, OptionGroupDataService, ProductAttributeValueDataService, ConstraintRuleDataService) {
+    function SaveConfigService($q, $log, BaseService, BaseConfigService, RemoteService, PageErrorDataService, LocationDataService, PricingMatrixDataService, OptionGroupDataService, ProductAttributeValueDataService, ProductAttributeConfigDataService, PAVObjConfigService, ConstraintRuleDataService) {
         var service = this;
 
         var productIdtoComponentMap = {};
@@ -441,9 +443,80 @@
                     }
                 })
             })
+
+            // Validation 3 : required attributes validation on save.
+            pavFieldNametoDFRMap = _.isEmpty(pavFieldNametoDFRMap) ? PAVObjConfigService.fieldNametoDFRMap : pavFieldNametoDFRMap;
+            prodductIdtoattributegroupsMap = _.isEmpty(prodductIdtoattributegroupsMap) ? ProductAttributeConfigDataService.getProdductIdtoattributegroupsMap() : prodductIdtoattributegroupsMap;
+            
+            // required fields validation for Bundle.
+            var bundlePAV = ProductAttributeValueDataService.getbundleproductattributevalues();
+            var requiredFields = getMissingRequiredFields(mainBundleProdId, bundlePAV);
+            var mainBundleProdName = BaseConfigService.lineItem.bundleProdName;
+            if(_.size(requiredFields) > 0)
+            {
+                PageErrorDataService.add('Required Fields('+requiredFields.join(', ')+') on '+mainBundleProdName+' are missing.');
+                res = false;
+            }
+
+            // required fields validation for options.
+            _.each(allOptionGroups, function(optiongroups, bProductId){
+                _.each(optiongroups, function(optiongroup){
+                    var parentId = optiongroup.parentId;
+                    //if parent is bundle productId or selected then proceed.
+                    if(parentId == mainBundleProdId
+                        || (_.has(productIdtoComponentMap, parentId)
+                            && _.has(productIdtoGroupMap, parentId)
+                            && isProdSelected(productIdtoComponentMap[parentId], productIdtoGroupMap[parentId])))
+                    {
+                        _.each(optiongroup.productOptionComponents, function(productcomponent){
+                            if(isProdSelected(productcomponent, optiongroup))
+                            {
+                                var componentId = productcomponent.componentId;
+                                var productId = productcomponent.productId;
+
+                                if(_.has(allcomponentIdToOptionPAVMap, componentId))
+                                {
+                                    var optionPAV = allcomponentIdToOptionPAVMap[componentId];
+                                    requiredFields = getMissingRequiredFields(productId, optionPAV);
+                                    if(_.size(requiredFields) > 0)
+                                    {
+                                        PageErrorDataService.add('Required Fields('+requiredFields.join(', ')+') on '+productcomponent.productName+' are missing.');
+                                        res = false;
+                                    }    
+                                }  
+                            }
+                        });
+                    }
+                })
+            })
+
             return res;
         }
         
+        function getMissingRequiredFields(productId, pav){
+            var res = [];
+            if(_.has(prodductIdtoattributegroupsMap, productId))
+            {
+                _.each(prodductIdtoattributegroupsMap[productId], function(attributeGroup){
+                    _.each(attributeGroup.productAtributes, function(prodAttribute){
+                        // if attribute is required and not selected then add the field.
+                        var attributeapi = prodAttribute.fieldName;
+                        if(!_.isUndefined(attributeapi)
+                            && !prodAttribute.isHidden 
+                            && !prodAttribute.isReadOnly
+                            && prodAttribute.isRequired
+                            && (_.isUndefined(pav[attributeapi])
+                                || _.isNull(pav[attributeapi])))
+                        {
+                            var attributeLabel = pavFieldNametoDFRMap[attributeapi].fieldDescribe.fieldLabel;
+                            res.push(attributeLabel);
+                        }
+                    })
+                })
+            }
+            return res;
+        }
+
         function isProdSelected(productcomponent){
             if(productcomponent.isselected) 
                 return true;

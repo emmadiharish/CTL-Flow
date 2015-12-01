@@ -12,11 +12,13 @@
 		var service = this;
 		var prodIdtoOptionGroupsMap = {};
 		var productIdtoComponentId_hasOptions = {};
+        var allProductIds = [];
 
 		service.isValid = false;
 
 		// Option Group Cache methods.
 		service.getProductIdsofBundles = getProductIdsofBundles;
+        service.getAllProductIds = getAllProductIds;
 		service.getOptionGroups = getOptionGroups;
 		service.initializeOptionGroups = initializeOptionGroups;
 
@@ -33,7 +35,10 @@
 			_.map(response.productIdtoOptionGroupsMap, (function(optionGroups, prodId){
                  _.each(optionGroups, function(group){
                 	_.each(group.productOptionComponents, function(component){
-                		//component.productName = characterRepace(component.productName);
+                		// collect all product Id's.
+                        allProductIds.push(component.productId);
+                        
+                        //component.productName = characterRepace(component.productName);
                 		if(_.has(productIdtoComponentId_hasOptions, prodId))
                 		{
                 			component['parentComponentId'] = productIdtoComponentId_hasOptions[prodId];
@@ -52,6 +57,10 @@
 
 		function getProductIdsofBundles(){
         	return _.keys(productIdtoComponentId_hasOptions);	
+        };
+
+        function getAllProductIds(){
+            return allProductIds;   
         };
 
         init();

@@ -29,6 +29,7 @@
         
         // option group methods.
         service.getallOptionGroups = getallOptionGroups;
+        service.getAllProductIds = getAllProductIds;
         service.getOptionGroup = getOptionGroup;
         service.getSelectedoptionproduct = getSelectedoptionproduct;
         service.setSelectedoptionproduct = setSelectedoptionproduct;
@@ -254,5 +255,9 @@
             });
             return prodOptions;
         }
+
+        function getAllProductIds(){
+            return OptionGroupCache.getAllProductIds();   
+        };
     }
 })();
