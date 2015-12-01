@@ -21,6 +21,8 @@
 
         var productIdtoComponentMap = {};
         var productIdtoGroupMap = {};
+        var pavFieldNametoDFRMap = {};
+        var prodductIdtoattributegroupsMap = {};
 
         service.saveinformation = saveinformation;
         
