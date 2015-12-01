@@ -6,7 +6,7 @@
     function ehconfigBlock($provide){
         $provide.decorator("$exceptionHandler", ['$delegate', 'PageErrorDataService', function($delegate, PageErrorDataService){
                 return function(exception, cause){
-                    var errormessage = 'Please contact Admin. Message: '+exception.message+' (caused by "' + cause + '")';
+                    var errormessage = exception+' Please contact Admin. Message: '+exception.message+' (caused by "' + cause + '")';
                     $delegate(exception, cause);
                     
                     // end progress bar so atleast user can abandon on hard-error.
