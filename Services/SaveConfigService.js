@@ -21,8 +21,11 @@
 
         var productIdtoComponentMap = {};
         var productIdtoGroupMap = {};
+        var allOptionGroups = {};
+        var allcomponentIdToOptionPAVMap = {};
         var pavFieldNametoDFRMap = {};
         var prodductIdtoattributegroupsMap = {};
+        
 
         service.saveinformation = saveinformation;
         
@@ -71,10 +74,10 @@
                                         Apttus_Config2__PrimaryLineNumber__c:parseInt(bundlePrimaryNumber)};
 
                 var productcomponentstobeUpserted = [];
-                var productcomponentstobeDeleted = [];
+                // var productcomponentstobeDeleted = [];
                 var componentIdtoPAVMap = {};
-                var allOptionGroups = OptionGroupDataService.getallOptionGroups();
-                var allcomponentIdToOptionPAVMap = ProductAttributeValueDataService.getoptionproductattributevalues();
+                // var allOptionGroups = OptionGroupDataService.getallOptionGroups();
+                // var allcomponentIdToOptionPAVMap = ProductAttributeValueDataService.getoptionproductattributevalues();
                 
                 _.each(allOptionGroups, function(optiongroups, bundleprodId){
                     _.each(optiongroups, function(optiongroup){
@@ -395,8 +398,9 @@
             }
             
             // Validation 2 : validate Min/Max options on option groups.
-            var allOptionGroups = OptionGroupDataService.getallOptionGroups();
             var mainBundleProdId = BaseConfigService.lineItem.bundleProdId;
+            allOptionGroups = OptionGroupDataService.getallOptionGroups();
+            allcomponentIdToOptionPAVMap = ProductAttributeValueDataService.getoptionproductattributevalues();
             productIdtoGroupMap = {};
             productIdtoComponentMap = {};
             _.each(allOptionGroups, function(optiongroups, bundleprodId){
